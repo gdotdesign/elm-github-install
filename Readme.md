@@ -26,7 +26,7 @@ These are the steps the installer takes:
 There are some caveats though:
 * [TODO] This installer doesn't check the installed elm-version
 * [DEPENDENCY] Git tags (semver) are needed other references cannot be installed
-	(branch name commit-hash)
+	(branch-name, commit-hash)
 * [DEPENDENCY] Git is needed
 * [DEPENDENCY] Node is needed
 
@@ -41,3 +41,11 @@ Use the command:
 ```
 elm-github-install
 ```
+
+## Demonstration
+The following repositories have their packages successfully installed and
+the main file successfully compiled (2016-06-12):
+* [STANDARD] https://github.com/debois/elm-mdl/tree/v7/demo - Demo.elm
+* [STANDARD] https://github.com/evancz/elm-sortable-table/tree/master/examples -
+	1-presidents.elm
+* [HAVE GITHUB DEPS] https://github.com/gdotdesign/elm-ui-website - source/Main.elm
