@@ -1,7 +1,7 @@
 # elm-github-install
 
-This node script and package that allows you to install Elm packages *directly
-from Github*, bypassing the package repository (package.elm-lang.org) while also
+This node script and package that allows you to install Elm packages **directly
+from Github**, bypassing the package repository (package.elm-lang.org) while also
 enabling restricted (effect manager and natvie) packages to be installed.
 
 ## Description
@@ -14,8 +14,8 @@ There are some things that made this possible:
 
 These are the steps the installer takes:
 * Reads the dependencies from `elm-package.json`
-* Transforms them to semver dependencies - *4.0.4 <= v < 5.0.0* becomes
-	*>= 4.0.4 < 5.0.0*
+* Transforms them to semver dependencies - **4.0.4 <= v < 5.0.0** becomes
+	**>= 4.0.4 < 5.0.0**
 * Loads the dependencies of the packages form Github and transforms them also
 * Resolve the dependencies
 * Install resolved dependencies into `elm-stuff/packages`
