@@ -4,7 +4,7 @@
 
 This node script and package that allows you to install Elm packages **directly
 from Github**, bypassing the package repository (package.elm-lang.org) while also
-enabling restricted (effect manager and natvie) packages to be installed.
+enabling restricted (effect manager and native) packages to be installed.
 
 ## Description
 
