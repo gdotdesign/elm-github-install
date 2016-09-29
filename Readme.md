@@ -39,6 +39,27 @@ Install it:
 npm install -g elm-github-install
 ```
 
+Elm packages are name after their github repositories, so you can simply declare the
+github package you want the way you would declare any other package.
+For example, if you want to install [NoRedInk's Elm css](https://github.com/NoRedInk/nri-elm-css)
+at version 1.3.0, you would do the following:
+
+```
+# elm-package.json
+{
+  ...
+  "dependencies": {
+    ...
+    "githubUser/repoName": "desiredVersion <= v < someLargerNumber",
+    "NoRedInk/nri-elm-css": "1.3.0 <= 1.3.0 < 2.0.0",
+    ...
+  }
+  ...
+}
+```
+
+You can find the current version of the package in the repository's `elm-package.json`.
+
 Use the command:
 ```
 elm-github-install
