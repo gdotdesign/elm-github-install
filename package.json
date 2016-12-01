@@ -1,6 +1,6 @@
 {
   "name": "elm-github-install",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Install Elm packages directly from Github",
   "main": "src/index.js",
   "scripts": {},
