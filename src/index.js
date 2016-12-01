@@ -1,6 +1,5 @@
 var SemverResolver = require('semver-resolver').SemverResolver
 var exec = require('child_process').exec
-var extract = require('extract-zip')
 var request = require('request')
 var semver = require('semver')
 var colors = require('colors')
@@ -8,6 +7,7 @@ var async = require('async')
 var path = require('path')
 var tmp = require('tmp')
 var fs = require('fs')
+var AdmZip = require('adm-zip');
 
 // Returns a function that downloads the given github repository at the given
 // reference and extracts it to elm-stuff/packages/owner/repository/reference
@@ -15,6 +15,7 @@ installExternalPackage = function(package, ref) {
   return function(callback){
     // Skip if it's already downloaded
     if(fs.existsSync(path.resolve('elm-stuff/packages/' + package + '/' + ref))){
+      console.log(' ●'.green, package + ' - ' + ref);
       return callback()
     }
 
@@ -31,23 +32,13 @@ installExternalPackage = function(package, ref) {
       .pipe(fs.createWriteStream(tmpFile.name))
       .on('finish', function(){
         // Extract the contents to the directory
-        extract(tmpFile.name, { dir: packagePath }, function(error){
-          if(error) {
-            console.log(' ✘'.red, package + ' - ' + ref)
-            console.log('   ▶', error)
-            callback(true)
-          } else {
-            // Rename the directory the archived had ( core-4.0.4 ) to
-            // the given reference (4.0.4)
-            var repo = package.split('/').pop()
-            fs.renameSync(path.resolve(packagePath, repo + '-' + ref),
-                          path.resolve(packagePath, ref))
-            console.log(' ●'.green, package + ' - ' + ref)
-            callback()
-          }
-          // Remove the temp file
-          tmpFile.removeCallback()
-        })
+        var zip = new AdmZip(tmpFile.name);
+        var repo = package.split('/').pop();
+        zip.extractAllTo(path.resolve(packagePath));
+        fs.renameSync(path.resolve(packagePath, repo + '-' + ref),
+                          path.resolve(packagePath, ref));
+        console.log(' ●'.green, package + ' - ' + ref);
+        callback();
       })
   }
 }
