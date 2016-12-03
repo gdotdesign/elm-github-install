@@ -19,7 +19,6 @@ installExternalPackage = function(package, ref) {
       return callback()
     }
 
-    var packageUrl = 'https://github.com/' + package + '/raw/' + ref + '/elm-package.json'
     var archiveUrl = 'https://github.com/' + package + '/archive/' + ref + '.zip'
     var packagePath = path.resolve('elm-stuff/packages/' + package)
 
