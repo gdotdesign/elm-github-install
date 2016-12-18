@@ -61,13 +61,39 @@ at version 1.3.0, you would do the following:
 ### Remote git repos
 
 Elm packages can also be hosted on arbitrary git remote repos. In order to use them, 
-you need to use a specific syntax in your package name :
-   
-    repoHostName:githubUser/repoName": "desiredVersion <= v < someLargerNumber"    
+you need to use a config file named `elm-github-package.json`, located in the root 
+project dir, aside `elm-package.json`. This file indicates the hosts associated to the 
+packages that are not in github.
 
-When you put the host name before the semicolon, then `elm-github-install` will
-use git+ssh in order to fetch the package. It can take a bit longer, but allows to 
-use arbitrary remotes. 
+Here's an example using a fictious `myuser/my-elm-lib` package, that exists on a 
+private git/ssh remote, cloneable at `git@mygit.myco.com:myuser/my-elm-lib.git`.
+
+The `elm-package.json` is the usual one :
+
+```
+{
+  ...
+  "dependencies": {
+    ...
+    "myuser/my-elm-lib": "1.0.0 <= v < 1.1.0",
+    ...
+  }
+  ...
+}
+```
+
+And the `elm-github-package.json` config file defines the host :
+
+
+```
+{
+    "myuser/my-elm-lib" : "mygit.mycompany.com"    
+}
+```
+   
+With that, `elm-github-package` will use ssh for and the provided host in order 
+to resolve and download the `myuser/my-elm-lib` package.
+
 
 You can find the current version of the package in the repository's `elm-package.json`.
 
