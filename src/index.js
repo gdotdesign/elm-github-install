@@ -259,7 +259,13 @@ module.exports = function () {
                 console.log('\nSome packages failed to install!');
             } else {
                 // Write te exact-dependencies.json
-                var depsStr = JSON.stringify(deps, null, '  ');
+                var cleanDeps = {};
+                Object.keys(deps).forEach(function (key) {
+                    var opts = packageNameToOptions(key);
+                    cleanDeps[opts.package] = getSemerVersion(deps[key].replace(/\s/g, ''));
+                });
+
+                var depsStr = JSON.stringify(cleanDeps, null, '  ');
                 fs.writeFileSync(path.resolve('elm-stuff/exact-dependencies.json'), depsStr);
                 console.log('\nPackages configured successfully!');
             }
