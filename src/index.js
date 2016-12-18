@@ -9,41 +9,47 @@ var tmp = require('tmp');
 var fs = require('fs');
 var AdmZip = require('adm-zip');
 
+var config = {};
+
+var isSsh = function(packageName) {
+    var pkgConf = config[packageName];
+    return !!pkgConf;
+};
+
+var repoHost = function(packageName) {
+    return config[packageName];
+};
+
 // Returns a function that downloads the given github repository at the given
 // reference and extracts it to elm-stuff/packages/owner/repository/reference
 var installExternalPackage = function (packageName, ref) {
     return function (callback) {
 
-        var opts = packageNameToOptions(packageName);
-
         // Skip if it's already downloaded
-        if (fs.existsSync(path.resolve('elm-stuff/packages/' + opts.package + '/' + ref))) {
-            console.log(' ●'.blue, opts.package + ' - ' + ref + ' (already present)');
+        var packagePathStr = 'elm-stuff/packages/' + packageName;
+        if (fs.existsSync(path.resolve(packagePathStr + '/' + ref))) {
+            console.log(' ●'.blue, packageName + ' - ' + ref + ' (already present)');
             return callback()
         }
 
-        var packagePathStr = 'elm-stuff/packages/' + opts.package;
+        if (isSsh(packageName)) {
 
-        // console.log("installExternalPackage: packagePathStr=" + packagePathStr);
-
-        if (opts.ssh) {
+            var h = repoHost(packageName);
 
             var cmd = 'rm -rf ' + packagePathStr +
                 ' && git clone --depth 1 --branch ' +
-                ref + ' git@' + opts.gitHubUrl +
-                ':' + opts.package + '.git ' + packagePathStr + '/' + ref;
-
-            // var cmd2 = 'echo "fooo"';
+                ref + ' git@' + h +
+                ':' + packageName + '.git ' + packagePathStr + '/' + ref;
 
             // console.log("installExternalPackage: cmd=" + cmd);
 
             exec(cmd, function(error, stdout, stderr){
                 if (error) {
-                    console.log(' ●'.red, opts.package + ' - ' + ref, error, stdout, stderr);
+                    console.log(' ●'.red, packageName + ' - ' + ref, error, stdout, stderr);
                     callback(error);
                 } else {
-                    console.log(' ●'.green, opts.package + ' - ' + ref + " (ssh@"
-                        + opts.gitHubUrl
+                    console.log(' ●'.green, packageName + ' - ' + ref + " (ssh@"
+                        + h
                         + ")"
                     );
                     callback();
@@ -54,7 +60,7 @@ var installExternalPackage = function (packageName, ref) {
         } else {
 
             var packagePath = path.resolve(packagePathStr);
-            var archiveUrl = 'https://' + opts.gitHubUrl + '/' + opts.package + '/archive/' + ref + '.zip';
+            var archiveUrl = 'https://github.com/' + packageName + '/archive/' + ref + '.zip';
 
             // Set up a temp file to store the archive in
             var tmpFile = tmp.fileSync({});
@@ -72,7 +78,7 @@ var installExternalPackage = function (packageName, ref) {
                     var repo = packageName.split('/').pop();
                     zip.extractAllTo(path.resolve(packagePath), true);
                     fs.renameSync(path.resolve(packagePath, repo + '-' + ref), path.resolve(packagePath, ref));
-                    console.log(' ●'.green, opts.package + ' - ' + ref);
+                    console.log(' ●'.green, packageName + ' - ' + ref);
                     callback();
                 })
         }
@@ -128,12 +134,11 @@ var getDependencies = function (packageName, ref) {
 var getPackageJson = function (packageName, ref) {
 
     // console.log("getPackageJson: package=" + package + ", ref=" + ref);
-    var opts = packageNameToOptions(packageName);
 
-    if (opts.ssh) {
-        return getPackageJsonSsh(opts, ref);
+    if (isSsh(packageName)) {
+        return getPackageJsonSsh(packageName, ref);
     } else {
-        var packageUrl = 'https://' + opts.gitHubUrl + '/' + opts.package + '/raw/' + ref + '/elm-package.json';
+        var packageUrl = 'https://github.com/' + packageName + '/raw/' + ref + '/elm-package.json';
         return new Promise(function (fulfill, reject) {
             request.get(packageUrl, function (error, response, body) {
                 if (error) {
@@ -146,18 +151,20 @@ var getPackageJson = function (packageName, ref) {
     }
 };
 
-var getPackageJsonSsh = function(urlAndPackage, ref) {
+var getPackageJsonSsh = function(packageName, ref) {
 
     // console.log("getPackageJsonSsh: urlAndPackage=" + JSON.stringify(urlAndPackage, null, "  ") + ", ref=" + ref);
 
     return new Promise(function (fulfill, reject) {
 
-        var repoName = urlAndPackage.package.split('/')[1];
+        var repoName = packageName.split('/')[1];
+
+        var host = repoHost(packageName);
 
         var cmd = 'cd /tmp && rm -rf ' + repoName +
             ' && git clone --no-checkout --depth 1 --branch ' +
-            ref + ' git@' + urlAndPackage.gitHubUrl +
-            ':' + urlAndPackage.package + '.git &&' +
+            ref + ' git@' + host +
+            ':' + packageName + '.git &&' +
             'cd elm-cassie && git show HEAD:elm-package.json';
 
         // console.log("getVersions: cmd=" + cmd);
@@ -176,39 +183,19 @@ var getPackageJsonSsh = function(urlAndPackage, ref) {
 };
 
 
-// return the github url for package
-var packageNameToOptions = function (packageName) {
-    var parts = packageName.split(":");
-    if (parts.length == 1) {
-        return {
-            gitHubUrl: "github.com",
-            package: packageName,
-            ssh: false
-        };
-    } else if (parts.length == 2) {
-        return {
-            gitHubUrl: parts[0],
-            package: parts[1],
-            ssh: true
-        }
-    } else {
-        throw "Unsupported package name : " + packageName;
-    }
-};
-
-
 // Get all available versions (tags) for a given package
 var getVersions = function (packageName) {
 
     // console.log("getVersions: package=" + package);
 
-    var urlAndPackage = packageNameToOptions(packageName);
-
     return new Promise(function (fulfill, reject) {
 
-        var sshStr = urlAndPackage.ssh ? '+ssh' : '';
-
-        var cmd = 'git ls-remote git' + sshStr + '://' + urlAndPackage.gitHubUrl + '/' + urlAndPackage.package + ".git | awk -F/ '{ print $3 }'";
+        var cmd;
+        if (isSsh(packageName)) {
+            cmd = 'git ls-remote git+ssh://' + repoHost(packageName) + '/' + packageName + ".git | awk -F/ '{ print $3 }'";
+        } else {
+            cmd = 'git ls-remote git://github.com/' + packageName + ".git | awk -F/ '{ print $3 }'";
+        }
 
         // console.log("getVersions: cmd=" + cmd);
 
@@ -232,6 +219,19 @@ var getVersions = function (packageName) {
 
 // The installer function
 module.exports = function () {
+
+    var curDir = process.cwd();
+
+    var configFileName = curDir + '/elm-github-package.json';
+    var configFilePath = path.resolve(configFileName);
+    if (fs.existsSync(configFilePath)) {
+        console.log("Config file found in " + configFilePath);
+        config = JSON.parse(fs.readFileSync(configFilePath, { encoding: 'utf-8' }));
+    // } else {
+    //     console.log("No config file found in current dir");
+    }
+
+
     // Get the config of the elm-package.json
     var packageConfig = require(path.resolve('elm-package.json'));
 
@@ -259,13 +259,7 @@ module.exports = function () {
                 console.log('\nSome packages failed to install!');
             } else {
                 // Write te exact-dependencies.json
-                var cleanDeps = {};
-                Object.keys(deps).forEach(function (key) {
-                    var opts = packageNameToOptions(key);
-                    cleanDeps[opts.package] = getSemerVersion(deps[key].replace(/\s/g, ''));
-                });
-
-                var depsStr = JSON.stringify(cleanDeps, null, '  ');
+                var depsStr = JSON.stringify(deps, null, '  ');
                 fs.writeFileSync(path.resolve('elm-stuff/exact-dependencies.json'), depsStr);
                 console.log('\nPackages configured successfully!');
             }
