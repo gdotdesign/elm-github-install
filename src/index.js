@@ -165,7 +165,7 @@ var getPackageJsonSsh = function(packageName, ref) {
             ' && git clone --no-checkout --depth 1 --branch ' +
             ref + ' git@' + host +
             ':' + packageName + '.git &&' +
-            'cd elm-cassie && git show HEAD:elm-package.json';
+            'cd ' + repoName + ' && git show HEAD:elm-package.json';
 
         // console.log("getVersions: cmd=" + cmd);
 
