@@ -1,95 +1,78 @@
-require 'git_clone_url'
-require 'fileutils'
-require 'solve'
-require 'json'
-require 'git'
-
 require_relative './cache'
 require_relative './utils'
 
 module ElmInstall
+  # Resolves git dependencies into the cache.
   class Resolver
-    def initialize(options = { verbose: false })
-      @cache = Cache.new
-      @options = options
+    attr_reader :constraints
+
+    # Initializes a resolver for a chace.
+    def initialize(cache)
+      @constraints = []
+      @cache = cache
     end
 
-    def resolve(constraints)
-      populate_elm_stuff Solve.it!(@cache.to_graph, constraints)
-    end
-
-    def populate_elm_stuff(solution)
-      solution.each do |package, version|
-        repository(package).checkout(version)
-
-        package_name = GitCloneUrl.parse(package).path
-        package_path = File.join('elm-stuff', 'packages', package_name, version)
-
-        puts " ● #{package_name} - #{version}"
-
-        next if Dir.exists?(package_path)
-
-        FileUtils.mkdir_p(package_path)
-        FileUtils.cp_r(repository_path(package), package_path)
-        FileUtils.rm_rf(File.join(package_path, '.git'))
+    # Add constrains, usually from the `elm-package.json`.
+    def add_constraints(constraints)
+      @constraints = add_dependencies(constraints) do |package, constraint|
+        [package, constraint]
       end
+    end
 
-      ecxact_deps = solution.each_with_object({}) do |(key, value), memo|
-        memo[GitCloneUrl.parse(key).path] = value
+    # Adds dependencies, usually from any `elm-package.json` file.
+    #
+    # :reek:NestedIterators { max_allowed_nesting: 2 }
+    def add_dependencies(dependencies)
+      dependencies.flat_map do |package_slug, constraint|
+        package = Utils.transform_package(package_slug)
+
+        add_package(package)
+
+        Utils.transform_constraint(constraint).map do |dependency|
+          yield package, dependency
+        end
       end
-
-      File.binwrite(File.join('elm-stuff', 'ecxact-dependencies.json'), JSON.pretty_generate(ecxact_deps))
     end
 
-    def save_cache
-      @cache.save
-    end
+    # Adds a package to the cache, the following things happens:
+    # * If there is no local repository it will be cloned
+    # * Getting all the tags and adding the valid ones to the cache
+    # * Checking out and getting the `elm-package.json` for each version
+    #   and adding them recursivly
+    def add_package(package)
+      return if @cache.package?(package)
 
-    def add_versions_for_package(path)
-      path = Utils.fix_path(path)
+      puts "Package: #{package} not found in cache, cloning..."
 
-      return if @cache.package?(path)
-
-      puts "Package: #{path} not found in cache, cloning..."
-
-      repository(path)
+      @cache
+        .repository(package)
         .tags
         .map(&:name)
-        .each do |tag|
-          @cache.ensure_version(path, tag)
-          add_version_for_package(tag, path)
+        .each do |version|
+          @cache.ensure_version(package, version)
+          add_version(package, version)
         end
     end
 
-    def add_version_for_package(tag, path)
-      repository(path).checkout(tag)
+    # Adds a version and it's dependencies to the cache.
+    def add_version(package, version)
+      @cache
+        .repository(package)
+        .checkout(version)
 
-      elm_package_json(path)['dependencies'].each do |key, value|
-        pkg_name = Utils.fix_path(key)
-        add_versions_for_package(key)
-
-        Utils.transform_constraint(value).each do |dep|
-          @cache.dependency(path, tag, [pkg_name, dep])
+      add_dependencies(elm_dependencies(package))
+        .each do |dependent_package, constraint|
+          add_package(key)
+          @cache.dependency(package, version, [dependent_package, constraint])
         end
-      end
     end
 
-    def elm_package_json(path)
-      JSON.parse(File.read(File.join(repository_path(path), 'elm-package.json')))
+    # Gets the `elm-package.json` for a package.
+    def elm_dependencies(package)
+      path = File.join(@cache.repository_path(package), 'elm-package.json')
+      JSON.parse(File.read(path))['dependencies']
     rescue
-      { 'dependencies' => [] }
-    end
-
-    def repository(path)
-      repo = Git.open(repository_path(path))
-      repo.reset_hard
-      repo
-    rescue
-      Git.clone(path, repository_path(path))
-    end
-
-    def repository_path(path)
-      File.join(@cache.directory, path)
+      []
     end
   end
 end
