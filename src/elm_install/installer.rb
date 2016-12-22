@@ -34,6 +34,8 @@ module ElmInstall
 
     # Resolves and copies a package and it's version to `elm-stuff/packages`
     # directory.
+    #
+    # TODO: copy reference if ref:...
     def resolve_package(package, version)
       @cache.repository(package).checkout(version)
 
