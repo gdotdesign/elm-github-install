@@ -192,7 +192,7 @@ var getVersions = function (packageName) {
 
         var cmd;
         if (isSsh(packageName)) {
-            cmd = 'git ls-remote git+ssh://' + repoHost(packageName) + '/' + packageName + ".git | awk -F/ '{ print $3 }'";
+            cmd = 'git ls-remote git://' + repoHost(packageName) + '/' + packageName + ".git | awk -F/ '{ print $3 }'";
         } else {
             cmd = 'git ls-remote git://github.com/' + packageName + ".git | awk -F/ '{ print $3 }'";
         }
