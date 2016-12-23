@@ -6,6 +6,7 @@ require 'solve'
 require 'json'
 require 'git'
 
+require_relative './elm_install/version'
 require_relative './elm_install/installer'
 
 # The main module for the gem.

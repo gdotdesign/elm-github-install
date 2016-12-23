@@ -5,13 +5,13 @@ require 'commander/import'
 require 'elm_install'
 
 program :name, 'elm-install'
-program :version, '0.0.1'
+program :version, ElmInstall::VERSION
 program :description, 'Install Elm packages from Git repositories.'
 
 command :install do |c|
-  c.syntax = 'elm-install install [options]'
-  c.summary = 'Installs Elm packages from the elm-package.json file.'
-  c.action do |args, options|
-  	ElmInstall.install
+  c.syntax = 'elm-install install'
+  c.summary = 'Install Elm packages from the elm-package.json file.'
+  c.action do
+    ElmInstall.install
   end
 end
