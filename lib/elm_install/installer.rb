@@ -54,7 +54,8 @@ module ElmInstall
       @cache.repository(package).checkout(ref)
 
       version_str = ref == version ? ref : "#{ref}(#{version})"
-      puts "  ● #{package_name} - #{version_str}"
+      Utils.log_with_dot "#{package_name} - #{version_str}"
+
       return if Dir.exist?(package_path)
 
       copy_package package, package_path

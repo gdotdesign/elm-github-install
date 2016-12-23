@@ -5,15 +5,17 @@ Gem::Specification.new do |s|
   s.version       = ElmInstall::VERSION
   s.authors       = ['Gusztáv Szikszai']
   s.email         = 'gusztav.szikszai@digitalnatives.hu'
-  # s.homepage      = '...'
+  s.homepage      = 'https://github.com/gdotdesign/elm-github-install'
   s.summary       = 'Install Elm packages from git repositories.'
   s.require_paths = ['lib']
 
   s.files =
-    `git ls-files`.split('\n')
+    `git ls-files`.split("\n")
 
   s.test_files =
     `git ls-files -- {test,spec,features}/*`.split("\n")
+
+  puts `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
 
   s.executables =
     `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
@@ -21,6 +23,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'git', '~> 1.3'
   s.add_dependency 'git_clone_url', '~> 2.0'
   s.add_dependency 'solve', '~> 3.1'
+  s.add_dependency 'commander', '~> 4.4', '>= 4.4.2'
+  s.add_dependency 'colorize', '~> 0.8.1'
 
   s.extra_rdoc_files = ['Readme.md']
 end
