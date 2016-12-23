@@ -64,7 +64,7 @@ module ElmInstall
     # Copies the given package from it's repository to the given path.
     def copy_package(package, package_path)
       FileUtils.mkdir_p(package_path)
-      FileUtils.cp_r(@cache.repository_path(package), package_path)
+      FileUtils.cp_r(File.join(@cache.repository_path(package),'.'), package_path)
       FileUtils.rm_rf(File.join(package_path, '.git'))
     end
 

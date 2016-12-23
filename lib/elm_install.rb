@@ -16,5 +16,3 @@ module ElmInstall
     Installer.new(options).install
   end
 end
-
-ElmInstall.install
