@@ -24,11 +24,15 @@ module ElmInstall
       File.binwrite(file, JSON.pretty_generate(@cache))
     end
 
+    def clear
+      @cache = {}
+    end
+
     # Loads a cache from the json file.
     def load
       @cache = JSON.parse(File.read(file))
     rescue
-      @cache = {}
+      clear
     end
 
     # Returns the directory where the cache is stored.
@@ -71,8 +75,15 @@ module ElmInstall
       if Dir.exist?(repo_path)
         repo = Git.open(repo_path)
         repo.reset_hard
+        unless package?(path)
+          Utils.log_with_dot "
+            Package: #{path} maybe not be up to date fetching changes...
+          ".strip
+          repo.fetch
+        end
         repo
       else
+        Utils.log_with_dot "Package: #{path} not found in cache, cloning..."
         Git.clone(path, repo_path)
       end
     end

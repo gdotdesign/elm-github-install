@@ -54,8 +54,6 @@ module ElmInstall
     def add_package(package)
       return if @cache.package?(package)
 
-      Utils.log_with_dot "Package: #{package} not found in cache, cloning..."
-
       @cache
         .repository(package)
         .tags

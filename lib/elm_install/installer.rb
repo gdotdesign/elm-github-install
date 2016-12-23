@@ -20,11 +20,17 @@ module ElmInstall
       puts 'Resolving packages...'
       resolver.add_constraints dependencies
 
+      puts 'Solving dependencies...'
+      begin
+        populate_elm_stuff
+      rescue
+        @cache.clear
+        resolver.add_constraints dependencies
+        populate_elm_stuff
+      end
+
       puts 'Saving index cache...'
       @cache.save
-
-      puts 'Solving dependencies...'
-      populate_elm_stuff
 
       puts 'Packages configured successfully!'
     end
