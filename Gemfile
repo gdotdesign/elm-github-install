@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
+gemspec
 
-gem 'git', '~> 1.3'
-gem 'git_clone_url', '~> 2.0'
-gem 'solve', '~> 3.1'
+gem 'rspec', '~> 3.5'
+gem 'rubocop', '~> 0.46.0'
+gem 'rubycritic', '~> 3.1', '>= 3.1.3'

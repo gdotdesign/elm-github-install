@@ -14,14 +14,19 @@ module ElmInstall
     end
 
     # Executes the installation
+    #
+    # :reek:TooManyStatements { max_statements: 7 }
     def install
-      puts "Resolving packages..."
+      puts 'Resolving packages...'
       resolver.add_constraints dependencies
-      puts "Saving index cache..."
+
+      puts 'Saving index cache...'
       @cache.save
-      puts "Solving dependencies..."
+
+      puts 'Solving dependencies...'
       populate_elm_stuff
-      puts "Packages configured successfully!"
+
+      puts 'Packages configured successfully!'
     end
 
     private
@@ -38,6 +43,8 @@ module ElmInstall
 
     # Resolves and copies a package and it's version to `elm-stuff/packages`
     # directory.
+    #
+    # :reek:TooManyStatements { max_statements: 9 }
     def resolve_package(package, version)
       package_name, package_path = Utils.package_version_path package, version
 

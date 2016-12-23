@@ -22,7 +22,7 @@ module ElmInstall
     # Adds dependencies, usually from any `elm-package.json` file.
     #
     # :reek:NestedIterators { max_allowed_nesting: 2 }
-    # :reek:TooMayStatements { max_allowed_statements: 6 }
+    # :reek:TooManyStatements { max_statements: 6 }
     def add_dependencies(dependencies)
       dependencies.flat_map do |package_slug, constraint|
         package = Utils.transform_package(package_slug)
@@ -72,10 +72,10 @@ module ElmInstall
         .repository(package)
         .checkout(version)
 
-      add_dependencies(elm_dependencies(package)) do |dependent_package, constraint|
-          add_package(dependent_package)
-          @cache.dependency(package, version, [dependent_package, constraint])
-        end
+      add_dependencies(elm_dependencies(package)) do |dep_package, constraint|
+        add_package(dep_package)
+        @cache.dependency(package, version, [dep_package, constraint])
+      end
     end
 
     # Gets the `elm-package.json` for a package.
