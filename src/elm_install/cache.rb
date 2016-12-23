@@ -21,7 +21,7 @@ module ElmInstall
 
     # Saves the cache into the json file.
     def save
-      File.binwrite(file, @cache.to_json)
+      File.binwrite(file, JSON.pretty_generate(@cache))
     end
 
     # Loads a cache from the json file.

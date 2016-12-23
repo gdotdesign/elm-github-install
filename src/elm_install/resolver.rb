@@ -72,9 +72,8 @@ module ElmInstall
         .repository(package)
         .checkout(version)
 
-      add_dependencies(elm_dependencies(package))
-        .each do |dependent_package, constraint|
-          add_package(key)
+      add_dependencies(elm_dependencies(package)) do |dependent_package, constraint|
+          add_package(dependent_package)
           @cache.dependency(package, version, [dependent_package, constraint])
         end
     end

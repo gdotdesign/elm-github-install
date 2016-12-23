@@ -15,9 +15,13 @@ module ElmInstall
 
     # Executes the installation
     def install
+      puts "Resolving packages..."
       resolver.add_constraints dependencies
-      populate_elm_stuff
+      puts "Saving index cache..."
       @cache.save
+      puts "Solving dependencies..."
+      populate_elm_stuff
+      puts "Packages configured successfully!"
     end
 
     private
@@ -34,14 +38,16 @@ module ElmInstall
 
     # Resolves and copies a package and it's version to `elm-stuff/packages`
     # directory.
-    #
-    # TODO: copy reference if ref:...
     def resolve_package(package, version)
-      @cache.repository(package).checkout(version)
-
       package_name, package_path = Utils.package_version_path package, version
 
-      puts " ● #{package_name} - #{version}"
+      matches = dependencies[package_name].to_s.match(/^(ref|branch):(.*)/)
+
+      ref = (matches && matches[2]) || version
+      @cache.repository(package).checkout(ref)
+
+      version_str = ref == version ? ref : "#{ref}(#{version})"
+      puts "  ● #{package_name} - #{version_str}"
       return if Dir.exist?(package_path)
 
       copy_package package, package_path

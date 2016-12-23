@@ -42,7 +42,7 @@ module ElmInstall
         add_dependency artifact, *dependency
       end
     rescue
-      if @options.verbose
+      if @options[:verbose]
         puts "WARNING: Could not add version #{version} to #{package}."
       end
     end
@@ -52,10 +52,10 @@ module ElmInstall
     def add_dependency(artifact, package, version)
       artifact.depends package, version
     rescue
-      if @options.verbose
+      if @options[:verbose]
         puts "
           WARNING: Could not add dependency #{package}-#{version} to #{artifact}
-        "
+        ".strip
       end
     end
   end

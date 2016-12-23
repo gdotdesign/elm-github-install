@@ -11,7 +11,9 @@ require_relative './elm_install/installer'
 module ElmInstall
   module_function
 
-  def install
-    Installer.new(verbose: true).install
+  def install(options = { verbose: false })
+    Installer.new(options).install
   end
 end
+
+ElmInstall.install

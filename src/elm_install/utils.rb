@@ -4,10 +4,10 @@ module ElmInstall
     module_function
 
     CONVERTERS = {
+      /v<(?!=)(.*)/ => '<',
       /(.*)<=v/ => '>=',
       /v<=(.*)/ => '<=',
-      /(.*)<v/ => '>',
-      /v<(.*)/ => '<'
+      /(.*)<v/ => '>'
     }.freeze
 
     def transform_constraint(constraint)
