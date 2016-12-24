@@ -50,6 +50,7 @@ module ElmInstall
 
       puts 'Packages configured successfully!'
     end
+
     # Populates the `elm-stuff` directory with the packages from
     # the solution.
     def populate_elm_stuff
@@ -68,7 +69,7 @@ module ElmInstall
     def resolve_package(package, version)
       package_name, package_path = Utils.package_version_path package, version
 
-      matches = dependencies[package_name].to_s.match(/^(ref|branch):(.*)/)
+      matches = (dependencies[package_name] || dependencies[package]).to_s.match(/^(ref|branch):(.*)/)
 
       ref = (matches && matches[2]) || version
       @cache.repository(package).checkout(ref)
@@ -118,9 +119,29 @@ module ElmInstall
         )
     end
 
-    # Returns the dependencies from the `elm-package.json` file.
     def dependencies
-      @dependencies ||=
+      raw_dependencies.each_with_object({}) do |(key, value), memo|
+        if dependency_sources.key?(key)
+          val = dependency_sources[key]
+          if val.is_a?(Hash)
+            memo[val['url']] = "ref:#{val['ref']}"
+          else
+            memo[val] = value
+          end
+        else
+          memo[key] = value
+        end
+      end
+    end
+
+    def dependency_sources
+      @dependency_sources ||=
+        JSON.parse(File.read('elm-package.json'))['dependency-sources']
+    end
+
+    # Returns the dependencies from the `elm-package.json` file.
+    def raw_dependencies
+      @raw_dependencies ||=
         JSON.parse(File.read('elm-package.json'))['dependencies']
     end
   end
