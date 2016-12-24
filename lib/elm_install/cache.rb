@@ -15,24 +15,28 @@ module ElmInstall
     # Initializes a new cache with the given options.
     def initialize(options = {})
       @options = options
+      @ref_cache = {}
       @cache = {}
       load
     end
 
     # Saves the cache into the json file.
     def save
+      File.binwrite(ref_file, JSON.pretty_generate(@ref_cache))
       File.binwrite(file, JSON.pretty_generate(@cache))
-    end
-
-    def clear
-      @cache = {}
     end
 
     # Loads a cache from the json file.
     def load
+      @ref_cache = JSON.parse(File.read(ref_file))
       @cache = JSON.parse(File.read(file))
     rescue
-      clear
+      @ref_cache = {}
+      @cache = {}
+    end
+
+    def clear
+      @ref_cache = {}
     end
 
     # Returns the directory where the cache is stored.
@@ -42,7 +46,7 @@ module ElmInstall
 
     # Returns if there is a package in the cache (with at least one version).
     def package?(package)
-      @cache.key?(package)
+      @ref_cache.key?(package) && @cache.key?(package)
     end
 
     # Adds a new dependency to the cache for a given package & version
@@ -75,20 +79,37 @@ module ElmInstall
       if Dir.exist?(repo_path)
         repo = Git.open(repo_path)
         repo.reset_hard
-        unless package?(path)
-          Utils.log_with_dot "
-            Package: #{path} maybe not be up to date fetching changes...
-          ".strip
-          repo.fetch
+
+        unless @ref_cache[path]
+          refs = refs_for(repo_path)
+
+          if HashDiff.diff(@ref_cache[path], refs).empty?
+            Utils.log_with_arrow "Package: #{path.bold} is outdated fetching changes..."
+            repo.fetch
+          end
+
+          @ref_cache[path] = refs
         end
+
         repo
       else
-        Utils.log_with_dot "Package: #{path} not found in cache, cloning..."
-        Git.clone(path, repo_path)
+        Utils.log_with_arrow "Package: #{path.bold} not found in cache, cloning..."
+        repo = Git.clone(path, repo_path)
+        @ref_cache[path] = refs_for(repo_path)
+        repo
       end
     end
 
     private
+
+    def refs_for(repo_path)
+      refs = Git.ls_remote(repo_path)
+      refs.delete('head')
+    end
+
+    def ref_file
+      File.join(directory, 'ref-cache.json')
+    end
 
     # Returns the path to the json file.
     def file

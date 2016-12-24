@@ -24,19 +24,32 @@ module ElmInstall
       begin
         populate_elm_stuff
       rescue
+        puts ' ▶ Could not find a solution in local cache, refreshing packages...'
+
         @cache.clear
         resolver.add_constraints dependencies
-        populate_elm_stuff
+
+        begin
+          populate_elm_stuff
+        rescue Solve::Errors::NoSolutionError => e
+          puts 'Could not find a solution:'
+          puts indent(e.to_s)
+        end
       end
-
-      puts 'Saving index cache...'
-      @cache.save
-
-      puts 'Packages configured successfully!'
     end
 
     private
 
+    def indent(str)
+      str.split("\n").map { |s| "  #{s}" }.join("\n")
+    end
+
+    def end_sucessfully
+      puts 'Saving package cache...'
+      @cache.save
+
+      puts 'Packages configured successfully!'
+    end
     # Populates the `elm-stuff` directory with the packages from
     # the solution.
     def populate_elm_stuff
@@ -45,6 +58,7 @@ module ElmInstall
       end
 
       write_exact_dependencies
+      end_sucessfully
     end
 
     # Resolves and copies a package and it's version to `elm-stuff/packages`
@@ -60,7 +74,7 @@ module ElmInstall
       @cache.repository(package).checkout(ref)
 
       version_str = ref == version ? ref : "#{ref}(#{version})"
-      Utils.log_with_dot "#{package_name} - #{version_str}"
+      Utils.log_with_dot "#{package_name.bold} - #{version_str.bold}"
 
       return if Dir.exist?(package_path)
 

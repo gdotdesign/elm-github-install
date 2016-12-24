@@ -23,6 +23,10 @@ module ElmInstall
       puts '  ● '.green + message
     end
 
+    def log_with_arrow(message)
+      puts "  ▶ #{message}"
+    end
+
     def package_version_path(package, version)
       package_name = GitCloneUrl.parse(package).path
       [package_name, File.join('elm-stuff', 'packages', package_name, version)]

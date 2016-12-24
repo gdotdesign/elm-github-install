@@ -22,7 +22,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'git_clone_url', '~> 2.0'
   s.add_dependency 'solve', '~> 3.1'
   s.add_dependency 'commander', '~> 4.4', '>= 4.4.2'
-  s.add_dependency 'colorize', '~> 0.8.1'
+  s.add_dependency 'smart_colored', '~> 1.1', '>= 1.1.1'
+  s.add_dependency 'hashdiff', '~> 0.3.1'
 
   s.extra_rdoc_files = ['Readme.md']
 end
