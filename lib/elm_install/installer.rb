@@ -1,5 +1,8 @@
 require_relative './resolver'
 require_relative './elm_package'
+require_relative './git_resolver'
+require_relative './graph_builder'
+require_relative './populator'
 
 module ElmInstall
   # This class is responsible getting a solution for the `elm-package.json`
@@ -10,7 +13,10 @@ module ElmInstall
 
     # Initializes a new installer with the given options.
     def initialize(options = { verbose: false })
+      options[:cache_directory] ||= File.join(Dir.home, '.elm-install')
+      @git_resolver = GitResolver.new directory: options[:cache_directory]
       @cache = Cache.new directory: options[:cache_directory]
+      @populator = Populator.new @git_resolver
       @options = options
     end
 
@@ -22,16 +28,21 @@ module ElmInstall
       resolver.add_constraints dependencies
 
       puts 'Solving dependencies...'
+      populate_elm_stuff
       begin
-        populate_elm_stuff
+
+        @git_resolver.save
+        @cache.save
       rescue
         puts ' ▶ Could not find a solution in local cache, refreshing packages...'
 
-        @cache.clear
+        @git_resolver.clear
         resolver.add_constraints dependencies
 
         begin
           populate_elm_stuff
+          @git_resolver.save
+          @cache.save
         rescue Solve::Errors::NoSolutionError => e
           puts 'Could not find a solution:'
           puts indent(e.to_s)
@@ -55,69 +66,21 @@ module ElmInstall
     # Populates the `elm-stuff` directory with the packages from
     # the solution.
     def populate_elm_stuff
-      solution.each do |package, version|
-        resolve_package package, version
-      end
-
-      write_exact_dependencies
+      @populator.populate calculate_solution
       end_sucessfully
-    end
-
-    # Resolves and copies a package and it's version to `elm-stuff/packages`
-    # directory.
-    #
-    # :reek:TooManyStatements { max_statements: 9 }
-    def resolve_package(package, version)
-      package_name, package_path = Utils.package_version_path package, version
-
-      matches = (dependencies[package_name] || dependencies[package]).to_s.match(/^(ref|branch):(.*)/)
-
-      ref = (matches && matches[2]) || version
-      @cache.repository(package).checkout(ref)
-
-      version_str = ref == version ? ref : "#{ref}(#{version})"
-      Utils.log_with_dot "#{package_name.bold} - #{version_str.bold}"
-
-      return if Dir.exist?(package_path)
-
-      copy_package package, package_path
-    end
-
-    # Copies the given package from it's repository to the given path.
-    def copy_package(package, package_path)
-      FileUtils.mkdir_p(package_path)
-      FileUtils.cp_r(
-        File.join(@cache.repository_path(package), '.'), package_path
-      )
-      FileUtils.rm_rf(File.join(package_path, '.git'))
-    end
-
-    # Writes the `elm-stuff/exact-dependencies.json` file.
-    def write_exact_dependencies
-      path = File.join('elm-stuff', 'exact-dependencies.json')
-      File.binwrite(path, JSON.pretty_generate(exact_dependencies))
-    end
-
-    # Returns the exact dependencies from the solution.
-    def exact_dependencies
-      @exact_dependencies ||=
-        solution.each_with_object({}) do |(key, value), memo|
-          memo[GitCloneUrl.parse(key).path] = value
-        end
     end
 
     # Returns the resolver to calculate the solution.
     def resolver
-      @resolver ||= Resolver.new @cache
+      @resolver ||= Resolver.new @cache, @git_resolver
     end
 
     # Returns the solution for the given `elm-package.json` file.
-    def solution
-      @solution ||=
-        Solve.it!(
-          GraphBuilder.graph_from_cache(@cache, @options),
-          resolver.constraints
-        )
+    def calculate_solution
+      Solve.it!(
+        GraphBuilder.graph_from_cache(@cache, @options),
+        resolver.constraints
+      )
     end
 
     def dependencies

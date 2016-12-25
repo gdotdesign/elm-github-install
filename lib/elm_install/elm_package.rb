@@ -1,25 +1,36 @@
 module ElmInstall
+  # This is a class for reading the `elm-package`.json file and
+  # transform it's `dependecies` field to a unified format.
   module ElmPackage
-    module_function
-
     # TODO: Error handling
-    def dependencies(path)
-      json = JSON.parse(File.read(path))
+    def self.dependencies(path)
+      json = read path
       transform_dependencies(
         json['dependencies'],
         json['dependency-sources'].to_h
       )
     end
 
-    def transform_dependencies(raw_dependencies, sources)
+    def self.read(path)
+      JSON.parse(File.read(path))
+    end
+
+    def self.transform_dependencies(raw_dependencies, sources)
       raw_dependencies.each_with_object({}) do |(package, constraint), memo|
-        value = sources.fetch(package, constraint)
+        value = sources.fetch(package, package)
+
         if value.is_a?(Hash)
-          memo[value['url']] = "ref:#{value['ref']}"
+          memo[value['url']] = value['ref']
         else
-          memo[package] = value
+          memo[transform_package(value)] = constraint
         end
       end
+    end
+
+    def self.transform_package(key)
+      GitCloneUrl.parse(key).to_s
+    rescue
+      "git@github.com:#{key}"
     end
   end
 end

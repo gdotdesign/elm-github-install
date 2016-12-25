@@ -19,26 +19,9 @@ module ElmInstall
       end.compact
     end
 
-    # :nocov:
-    def log_with_dot(message)
-      puts '  ● '.green + message
-    end
-
-    def log_with_arrow(message)
-      puts "  ▶ #{message}"
-    end
-    # :nocov:
-
     def package_version_path(package, version)
-      package_name = GitCloneUrl.parse(package).path.sub(/^\//, '')
+      package_name = GitCloneUrl.parse(package).path.sub(%r{^/}, '')
       [package_name, File.join('elm-stuff', 'packages', package_name, version)]
-    end
-
-    def transform_package(key)
-      GitCloneUrl.parse(key)
-      key
-    rescue
-      "git@github.com:#{key}"
     end
   end
 end

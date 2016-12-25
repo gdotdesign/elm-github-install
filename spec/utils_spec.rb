@@ -11,18 +11,6 @@ describe ElmInstall::Utils do
     ]
   end
 
-  describe '.transform_package' do
-    it 'should transform normal packages names to github ones' do
-      expect(subject.transform_package('test/repo'))
-        .to eq('git@github.com:test/repo')
-    end
-
-    it 'should return valid git urls' do
-      expect(subject.transform_package('git@github.com:test/repo'))
-        .to eq('git@github.com:test/repo')
-    end
-  end
-
   describe '.package_version_path' do
     it 'should return the path for a package in elm-stuff' do
       package_variations.each do |package|
