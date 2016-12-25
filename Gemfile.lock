@@ -28,6 +28,7 @@ GEM
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.2.5)
+    docile (1.1.5)
     equalizer (0.0.11)
     erubis (2.7.0)
     flay (2.8.1)
@@ -45,6 +46,7 @@ GEM
     hashdiff (0.3.1)
     highline (1.7.8)
     ice_nine (0.11.2)
+    json (2.0.2)
     launchy (2.4.3)
       addressable (~> 2.3)
     molinillo (0.5.4)
@@ -91,6 +93,11 @@ GEM
       virtus (~> 1.0)
     semverse (2.0.0)
     sexp_processor (4.7.0)
+    simplecov (0.12.0)
+      docile (~> 1.1.0)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
     smart_colored (1.1.1)
     solve (3.1.0)
       molinillo (>= 0.5)
@@ -112,6 +119,7 @@ DEPENDENCIES
   rspec (~> 3.5)
   rubocop (~> 0.46.0)
   rubycritic (~> 3.1, >= 3.1.3)
+  simplecov (~> 0.12.0)
 
 BUNDLED WITH
    1.13.6

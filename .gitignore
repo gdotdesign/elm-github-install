@@ -6,3 +6,4 @@ pkg
 packaging/vendor
 packaging/elm-install*
 packaging/traveling-ruby*
+coverage

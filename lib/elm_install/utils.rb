@@ -19,6 +19,7 @@ module ElmInstall
       end.compact
     end
 
+    # :nocov:
     def log_with_dot(message)
       puts '  ● '.green + message
     end
@@ -26,9 +27,10 @@ module ElmInstall
     def log_with_arrow(message)
       puts "  ▶ #{message}"
     end
+    # :nocov:
 
     def package_version_path(package, version)
-      package_name = GitCloneUrl.parse(package).path
+      package_name = GitCloneUrl.parse(package).path.sub(/^\//, '')
       [package_name, File.join('elm-stuff', 'packages', package_name, version)]
     end
 

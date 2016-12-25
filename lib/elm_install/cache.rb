@@ -75,6 +75,7 @@ module ElmInstall
     # Returns the Git repository of the given package in a ready to use state.
     def repository(path)
       repo_path = repository_path(path)
+      repo = nil
 
       if Dir.exist?(repo_path)
         repo = Git.open(repo_path)
@@ -90,14 +91,13 @@ module ElmInstall
 
           @ref_cache[path] = refs
         end
-
-        repo
       else
         Utils.log_with_arrow "Package: #{path.bold} not found in cache, cloning..."
         repo = Git.clone(path, repo_path)
         @ref_cache[path] = refs_for(repo_path)
-        repo
       end
+
+      repo
     end
 
     private

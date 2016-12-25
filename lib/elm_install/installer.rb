@@ -1,4 +1,5 @@
 require_relative './resolver'
+require_relative './elm_package'
 
 module ElmInstall
   # This class is responsible getting a solution for the `elm-package.json`
@@ -9,8 +10,8 @@ module ElmInstall
 
     # Initializes a new installer with the given options.
     def initialize(options = { verbose: false })
+      @cache = Cache.new directory: options[:cache_directory]
       @options = options
-      @cache = Cache.new
     end
 
     # Executes the installation
@@ -120,29 +121,7 @@ module ElmInstall
     end
 
     def dependencies
-      raw_dependencies.each_with_object({}) do |(key, value), memo|
-        if dependency_sources.key?(key)
-          val = dependency_sources[key]
-          if val.is_a?(Hash)
-            memo[val['url']] = "ref:#{val['ref']}"
-          else
-            memo[val] = value
-          end
-        else
-          memo[key] = value
-        end
-      end
-    end
-
-    def dependency_sources
-      @dependency_sources ||=
-        JSON.parse(File.read('elm-package.json'))['dependency-sources']
-    end
-
-    # Returns the dependencies from the `elm-package.json` file.
-    def raw_dependencies
-      @raw_dependencies ||=
-        JSON.parse(File.read('elm-package.json'))['dependencies']
+      @dependencies ||= ElmPackage.dependencies 'elm-package.json'
     end
   end
 end
