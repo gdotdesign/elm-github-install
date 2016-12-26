@@ -40,7 +40,14 @@ module ElmInstall
     # Adds a dependency by git reference.
     def add_ref_dependency(package, ref)
       @git_resolver.repository(package).checkout(ref)
-      [[package, "= #{elm_package(package)['version']}"]]
+      pkg_version = elm_package(package)['version']
+      version = "1000.0.0-#{ref}-#{pkg_version}"
+      @cache.ensure_version(package, version)
+      add_dependencies(elm_dependencies(package)) do |dep_package, constraint|
+        add_package(dep_package)
+        @cache.dependency(package, version, [dep_package, constraint])
+      end
+      [[package, "= #{version}"]]
     end
 
     # Adds a package to the cache, the following things happens:
