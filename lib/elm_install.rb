@@ -1,6 +1,7 @@
 require 'smart_colored/extend'
 require 'git_clone_url'
 require 'forwardable'
+require 'indentation'
 require 'fileutils'
 require 'hashdiff'
 require 'solve'

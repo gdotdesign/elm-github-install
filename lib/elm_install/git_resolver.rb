@@ -7,18 +7,29 @@ module ElmInstall
     def initialize(options)
       @file = 'ref-cache.json'
       super options
+      @check_cache =
+        @cache.keys.each_with_object({}) { |key, memo| memo[key] = true }
     end
 
     def refs(url)
       self.class.refs(url)
     end
 
+    def clear
+      @check_cache = {}
+    end
+
     def self.refs(url)
       refs = Git.ls_remote url
       refs.delete 'head'
-      refs
+      JSON.parse(refs.to_json)
     end
 
+    def package?(url)
+      @check_cache.key?(repository_path(url))
+    end
+
+    # :reek:FeatureEnvy
     def repository_path(url)
       uri = GitCloneUrl.parse(url)
       File.join(directory, uri.host, uri.path)
@@ -40,6 +51,7 @@ module ElmInstall
         repo.fetch
       end
 
+      @check_cache[directory] = true
       cache[directory] = refs
     end
 
@@ -51,7 +63,7 @@ module ElmInstall
       repo = Git.open path
       repo.reset_hard
 
-      yield repo unless cache[path]
+      yield repo unless @check_cache[path]
 
       repo
     end
@@ -60,6 +72,7 @@ module ElmInstall
       Logger.arrow "Package: #{url.bold} not found in cache, cloning..."
       FileUtils.mkdir_p path
       repo = Git.clone(url, path)
+      @check_cache[path] = true
       cache[path] = refs url
       repo
     end

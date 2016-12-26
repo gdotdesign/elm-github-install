@@ -19,6 +19,7 @@ describe ElmInstall::GitResolver do
 
       context 'with cache' do
         before do
+          subject.instance_variable_get('@check_cache')[directory] = {}
           subject.cache[directory] = {}
         end
 

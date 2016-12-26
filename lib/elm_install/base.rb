@@ -13,10 +13,6 @@ module ElmInstall
       load
     end
 
-    def clear
-      @cache = {}
-    end
-
     # Saves the cache into the json file.
     def save
       File.binwrite(file, JSON.pretty_generate(@cache))

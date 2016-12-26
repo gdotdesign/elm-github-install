@@ -49,7 +49,7 @@ module ElmInstall
     # * Checking out and getting the `elm-package.json` for each version
     #   and adding them recursivly
     def add_package(package)
-      return if @cache.key?(package)
+      return if @git_resolver.package?(package) && @cache.key?(package)
 
       @git_resolver
         .repository(package)

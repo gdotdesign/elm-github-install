@@ -12,12 +12,21 @@ module ElmInstall
     extend Forwardable
 
     # Initializes a new installer with the given options.
-    def initialize(options = { verbose: false })
-      options[:cache_directory] ||= File.join(Dir.home, '.elm-install')
-      @git_resolver = GitResolver.new directory: options[:cache_directory]
-      @cache = Cache.new directory: options[:cache_directory]
+    def initialize(options)
+      init_options options
+      @git_resolver = GitResolver.new directory: cache_directory
+      @cache = Cache.new directory: cache_directory
       @populator = Populator.new @git_resolver
       @options = options
+    end
+
+    def init_options(options = { verbose: false })
+      options[:cache_directory] ||= File.join(Dir.home, '.elm-install')
+      @options = options
+    end
+
+    def cache_directory
+      @options[:cache_directory]
     end
 
     # Executes the installation
@@ -29,45 +38,38 @@ module ElmInstall
 
       puts 'Solving dependencies...'
       populate_elm_stuff
-      begin
+    rescue
+      retry_install
+    end
 
-        @git_resolver.save
-        @cache.save
-      rescue
-        puts ' ▶ Could not find a solution in local cache, refreshing packages...'
+    def save
+      puts 'Saving package cache...'
+      @git_resolver.save
+      @cache.save
+    end
 
-        @git_resolver.clear
-        resolver.add_constraints dependencies
+    def retry_install
+      Logger.arrow(
+        'Could not find a solution in local cache, refreshing packages...'
+      )
 
-        begin
-          populate_elm_stuff
-          @git_resolver.save
-          @cache.save
-        rescue Solve::Errors::NoSolutionError => e
-          puts 'Could not find a solution:'
-          puts indent(e.to_s)
-        end
-      end
+      @git_resolver.clear
+      resolver.add_constraints dependencies
+
+      populate_elm_stuff
+    rescue Solve::Errors::NoSolutionError => error
+      puts 'Could not find a solution:'
+      puts error.to_s.indent(2)
     end
 
     private
 
-    def indent(str)
-      str.split("\n").map { |s| "  #{s}" }.join("\n")
-    end
-
-    def end_sucessfully
-      puts 'Saving package cache...'
-      @cache.save
-
-      puts 'Packages configured successfully!'
-    end
-
     # Populates the `elm-stuff` directory with the packages from
     # the solution.
     def populate_elm_stuff
+      save
       @populator.populate calculate_solution
-      end_sucessfully
+      puts 'Packages configured successfully!'
     end
 
     # Returns the resolver to calculate the solution.
