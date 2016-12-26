@@ -18,18 +18,18 @@ module ElmInstall
     #
     # :reek:TooManyStatements { max_statements: 9 }
     def resolve_package(package, version_str)
-      match = version_str.match /1000\.0\.0-(.+)-(.+)/
+      match = version_str.match /(.+)\+(.+)/
 
       version =
         if match
-          match[2]
+          match[1]
         else
           version_str
         end
 
       ref =
         if match
-          match[1]
+          match[2]
         else
           version_str
         end
@@ -38,9 +38,9 @@ module ElmInstall
 
       @git_resolver.repository(package).checkout(ref)
 
-      Logger.dot "#{package_name.bold} - #{version.bold}"
+      Logger.dot "#{package_name.bold} - #{version.bold} (#{ref})"
 
-      return if Dir.exist?(package_path)
+      FileUtils.rm_rf(package_path) if Dir.exist?(package_path)
 
       copy_package package, package_path
     end
@@ -65,11 +65,11 @@ module ElmInstall
     # Returns the exact dependencies from the solution.
     def self.exact_dependencies(solution)
       solution.each_with_object({}) do |(key, value), memo|
-        match = value.match /1000\.0\.0-(.+)-(.+)/
+        match = value.match /(.+)\+(.+)/
 
         version =
           if match
-            match[2]
+            match[1]
           else
             value
           end
