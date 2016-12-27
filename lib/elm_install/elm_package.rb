@@ -21,10 +21,31 @@ module ElmInstall
 
         if value.is_a?(Hash)
           memo[value['url']] = value['ref']
+          check_path package, value['url']
         else
-          memo[transform_package(value)] = constraint
+          url = transform_package(value)
+          check_path package, url
+          memo[url] = constraint
         end
       end
+    end
+
+    def self.check_path(package, url)
+      uri = GitCloneUrl.parse(url)
+      path = uri.path.sub(%r{^/}, '')
+
+      return if path == package
+
+      puts "
+  The source of package #{package.bold} is set to #{url.bold} which would
+  be install to #{"elm-stuff/#{path}".bold}. This would cause a conflict
+  when trying to compile anything.
+
+  The name of a package must match the source url's path.
+
+  #{package.bold} <=> #{path.bold}
+      "
+      Process.exit
     end
 
     def self.transform_package(key)
