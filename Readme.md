@@ -5,7 +5,7 @@
 [![Inline docs](http://inch-ci.org/github/gdotdesign/elm-github-install.svg?branch=master)](http://inch-ci.org/github/gdotdesign/elm-github-install)
 
 This gem allows you to install Elm packages **directly from any Git repository
-(event private ones)**, bypassing the package repository (package.elm-lang.org)
+(even private ones)**, bypassing the package repository (package.elm-lang.org)
 while also enabling restricted (effect manager and native) packages to be
 installed.
 
@@ -66,7 +66,7 @@ the url of the git repository, this is because it could cause conflicts.
 The source can be defined by a string or a hash containing the url and the
 reference (tag, commit hash, branch) to use. If a reference is defined then
 the version in the `dependencies` field is ignored and the **version will be
-used `elm-package.json` is at that reference (= 2.0.0)**.
+used from the `elm-package.json` at that reference (= 2.0.0)**.
 
 ```
   ...

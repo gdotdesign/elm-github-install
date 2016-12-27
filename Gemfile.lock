@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    elm_install (0.1.2)
+    elm_install (0.1.3)
       commander (~> 4.4, >= 4.4.2)
       git (~> 1.3)
       git_clone_url (~> 2.0)
