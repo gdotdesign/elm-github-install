@@ -1,6 +1,7 @@
 module ElmInstall
   # This class is for building dependency graphs from a cache.
   class GraphBuilder
+    # @return [Solve::Graph] The graph
     attr_reader :graph
 
     # Returns a graph from a cache and options.

@@ -15,6 +15,11 @@ require_relative './elm_install/installer'
 module ElmInstall
   module_function
 
+  # Starts an install with the given isntallation.
+  #
+  # @param options [Hash] The options
+  #
+  # @return [void]
   def install(options = { verbose: false })
     Installer.new(options).install
   end

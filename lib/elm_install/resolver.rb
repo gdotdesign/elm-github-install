@@ -4,9 +4,13 @@ require_relative './utils'
 module ElmInstall
   # Resolves git dependencies into the cache.
   class Resolver
+    # @return [Array] The constraints
     attr_reader :constraints
 
-    # Initializes a resolver for a chace.
+    # Initializes a resolver with a chace and git resolver.
+    #
+    # @param cache [Cache] The cache
+    # @param git_resolver [GitResolver] The git resolver
     def initialize(cache, git_resolver)
       @git_resolver = git_resolver
       @constraints = []
@@ -14,6 +18,10 @@ module ElmInstall
     end
 
     # Add constraints, usually from the `elm-package.json`.
+    #
+    # @param constraints [Hash] The constraints
+    #
+    # @return [void]
     def add_constraints(constraints)
       @constraints = add_dependencies(constraints) do |package, constraint|
         [package, constraint]
@@ -23,6 +31,11 @@ module ElmInstall
     # Adds dependencies, usually from any `elm-package.json` file.
     #
     # :reek:NestedIterators { max_allowed_nesting: 2 }
+    #
+    # @param dependencies [Hash] The dependencies
+    #
+    # @yieldreturn [Array] A constraint
+    # @return [void]
     def add_dependencies(dependencies)
       dependencies.flat_map do |package, constraint|
         add_package(package)
@@ -37,6 +50,11 @@ module ElmInstall
     end
 
     # Adds a dependency by git reference.
+    #
+    # @param package [String] The package
+    # @param ref [String] The reference
+    #
+    # @return [void]
     def add_ref_dependency(package, ref)
       @git_resolver.repository(package).checkout(ref)
       pkg_version = elm_package(package)['version']
@@ -51,6 +69,10 @@ module ElmInstall
     # * Getting all the tags and adding the valid ones to the cache
     # * Checking out and getting the `elm-package.json` for each version
     #   and adding them recursivly
+    #
+    # @param package [String] The package
+    #
+    # @return [void]
     def add_package(package)
       return if @git_resolver.package?(package) && @cache.key?(package)
 
@@ -64,6 +86,12 @@ module ElmInstall
         end
     end
 
+    # Adds a package's dependencies to the cache.
+    #
+    # @param package [String] The package
+    # @param version [String] The version
+    #
+    # @return [void]
     def add_package_dependencies(package, version)
       add_dependencies(elm_dependencies(package)) do |dep_package, constraint|
         add_package(dep_package)
@@ -72,6 +100,11 @@ module ElmInstall
     end
 
     # Adds a version and it's dependencies to the cache.
+    #
+    # @param package [String] The package
+    # @param version [String] The version
+    #
+    # @return [void]
     def add_version(package, version)
       @git_resolver
         .repository(package)
@@ -81,16 +114,30 @@ module ElmInstall
     end
 
     # Gets the `elm-package.json` for a package.
+    #
+    # @param package [String] The package
+    #
+    # @return [Hash] The dependencies
     def elm_dependencies(package)
       ElmPackage.dependencies elm_package_path(package)
     rescue
-      []
+      {}
     end
 
+    # Retruns the contents of the `elm-pacakge.json` of the given package.
+    #
+    # @param package [String] The package
+    #
+    # @return [Hash] The contents
     def elm_package(package)
       ElmPackage.read elm_package_path(package)
     end
 
+    # Retruns the path of the `elm-pacakge.json` of the given package.
+    #
+    # @param package [String] The package
+    #
+    # @return [String] The path
     def elm_package_path(package)
       File.join(@git_resolver.repository_path(package), 'elm-package.json')
     end

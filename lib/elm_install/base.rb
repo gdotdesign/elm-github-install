@@ -3,6 +3,7 @@ module ElmInstall
   class Base
     extend Forwardable
 
+    # @return [Hash] The current cache
     attr_reader :cache
 
     def_delegators :@cache, :each, :key?
