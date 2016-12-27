@@ -13,6 +13,7 @@ RSpec.configure do |config|
 end
 
 SimpleCov.start do
+  add_filter '/vendor/'
   add_filter '/spec/'
 end
 
