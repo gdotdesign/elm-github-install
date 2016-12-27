@@ -1,10 +1,18 @@
 module ElmInstall
   # This class is responsible for populating the `elm-stuff` directory.
   class Populator
+    # Initializes a new populator.
+    #
+    # @param git_resolver [GitResolver] The git resolver to use.
     def initialize(git_resolver)
       @git_resolver = git_resolver
     end
 
+    # Populates `elm-stuff` from the given solution.
+    #
+    # @param solution [Hash] The solution.
+    #
+    # @return [void]
     def populate(solution)
       solution.each do |package, version|
         resolve_package package, version
@@ -17,6 +25,11 @@ module ElmInstall
     # directory.
     #
     # :reek:TooManyStatements { max_statements: 9 }
+    #
+    # @param package [String] The package
+    # @param version_str [String] The resolved version
+    #
+    # @return [void]
     def resolve_package(package, version_str)
       version, ref = self.class.version_and_ref(version_str)
 
@@ -32,6 +45,11 @@ module ElmInstall
     end
 
     # Copies the given package from it's repository to the given path.
+    #
+    # @param package [String] The package to copy
+    # @param package_path [String] The destination
+    #
+    # @return [void]
     def copy_package(package, package_path)
       repository_path = File.join(@git_resolver.repository_path(package), '.')
 
@@ -41,6 +59,10 @@ module ElmInstall
     end
 
     # Writes the `elm-stuff/exact-dependencies.json` file.
+    #
+    # @param solution [Hash] The solution
+    #
+    # @return [void]
     def write_exact_dependencies(solution)
       File.binwrite(
         File.join('elm-stuff', 'exact-dependencies.json'),
@@ -49,6 +71,10 @@ module ElmInstall
     end
 
     # Returns the exact dependencies from the solution.
+    #
+    # @param solution [Hash] The solution
+    #
+    # @return [void]
     def self.exact_dependencies(solution)
       solution.each_with_object({}) do |(key, value), memo|
         version, = version_and_ref value
@@ -57,6 +83,11 @@ module ElmInstall
       end
     end
 
+    # Retruns the version and the ref from the given string.
+    #
+    # @param value [String] The input
+    #
+    # @return [Array] The version and the ref as an array
     def self.version_and_ref(value)
       match = value.match(/(.+)\+(.+)/)
 

@@ -3,14 +3,22 @@ module ElmInstall
   class GraphBuilder
     attr_reader :graph
 
-    # Returns a graph from a cache.
+    # Returns a graph from a cache and options.
+    #
+    # @param cache [Cache] The cache to generate the graph from.
+    # @param options [Hash] The options to use.
+    #
+    # @return [Solve::Graph] The graph
     def self.graph_from_cache(cache, options = { verbose: false })
       graph = new cache, options
       graph.build
       graph.graph
     end
 
-    # Initialies a graph build with a cache
+    # Initialies a graph build with a cache and options.
+    #
+    # @param cache [Cache] The cache to generate the graph from.
+    # @param options [Hash] The options to use.
     def initialize(cache, options = { verbose: false })
       @graph = Solve::Graph.new
       @options = options
@@ -18,6 +26,8 @@ module ElmInstall
     end
 
     # Builds the graph.
+    #
+    # @return [void]
     def build
       @cache.each do |package, versions|
         add_versions package, versions
