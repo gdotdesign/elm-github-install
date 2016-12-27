@@ -4,7 +4,7 @@ CACHE_DIRECTORY = 'spec/fixtures/cache'.freeze
 
 RSpec.configure do |config|
   config.before do
-    FileUtils.mkdir CACHE_DIRECTORY
+    FileUtils.mkdir_p CACHE_DIRECTORY
   end
 
   config.after do
