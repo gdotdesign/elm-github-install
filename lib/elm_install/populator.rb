@@ -18,21 +18,7 @@ module ElmInstall
     #
     # :reek:TooManyStatements { max_statements: 9 }
     def resolve_package(package, version_str)
-      match = version_str.match /(.+)\+(.+)/
-
-      version =
-        if match
-          match[1]
-        else
-          version_str
-        end
-
-      ref =
-        if match
-          match[2]
-        else
-          version_str
-        end
+      version, ref = self.class.version_and_ref(version_str)
 
       package_name, package_path = Utils.package_version_path package, version
 
@@ -65,17 +51,19 @@ module ElmInstall
     # Returns the exact dependencies from the solution.
     def self.exact_dependencies(solution)
       solution.each_with_object({}) do |(key, value), memo|
-        match = value.match /(.+)\+(.+)/
-
-        version =
-          if match
-            match[1]
-          else
-            value
-          end
+        version, = version_and_ref value
 
         memo[GitCloneUrl.parse(key).path.sub(%r{^/}, '')] = version
       end
+    end
+
+    def self.version_and_ref(value)
+      match = value.match(/(.+)\+(.+)/)
+
+      version = match ? match[1] : value
+      ref = match ? match[2] : value
+
+      [version, ref]
     end
   end
 end

@@ -23,7 +23,6 @@ module ElmInstall
     # Adds dependencies, usually from any `elm-package.json` file.
     #
     # :reek:NestedIterators { max_allowed_nesting: 2 }
-    # :reek:TooManyStatements { max_statements: 6 }
     def add_dependencies(dependencies)
       dependencies.flat_map do |package, constraint|
         add_package(package)
@@ -43,10 +42,7 @@ module ElmInstall
       pkg_version = elm_package(package)['version']
       version = "#{pkg_version}+#{ref}"
       @cache.ensure_version(package, version)
-      add_dependencies(elm_dependencies(package)) do |dep_package, constraint|
-        add_package(dep_package)
-        @cache.dependency(package, version, [dep_package, constraint])
-      end
+      add_package_dependencies(package, version)
       [[package, "= #{version}"]]
     end
 
@@ -68,16 +64,20 @@ module ElmInstall
         end
     end
 
+    def add_package_dependencies(package, version)
+      add_dependencies(elm_dependencies(package)) do |dep_package, constraint|
+        add_package(dep_package)
+        @cache.dependency(package, version, [dep_package, constraint])
+      end
+    end
+
     # Adds a version and it's dependencies to the cache.
     def add_version(package, version)
       @git_resolver
         .repository(package)
         .checkout(version)
 
-      add_dependencies(elm_dependencies(package)) do |dep_package, constraint|
-        add_package(dep_package)
-        @cache.dependency(package, version, [dep_package, constraint])
-      end
+      add_package_dependencies(package, version)
     end
 
     # Gets the `elm-package.json` for a package.
