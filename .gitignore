@@ -7,3 +7,7 @@ packaging/vendor
 packaging/elm-install*
 packaging/traveling-ruby*
 coverage
+test.elm
+test.rb
+elm-package.json
+index.html
