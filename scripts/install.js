@@ -6,15 +6,19 @@ var zlib = require('zlib')
 var fs = require('fs')
 var os = require('os')
 
-var config = require(path.join(__dirname, '../package.json'))
+var versionPath = path.join(__dirname, '../lib/elm_install/version.rb')
+var version =
+  fs.readFileSync(versionPath, 'utf-8')
+    .match(/(\d+\.\d+\.\d+)/)[1]
 
 var homedir = path.join(os.homedir(), '.elm-install')
 var platform = os.platform()
-var version = config.version
 var arch = process.arch
 
 var prefix =
   "https://github.com/gdotdesign/elm-github-install/releases/download"
+
+var extractor = tar.extract(homedir)
 
 var packageUrl = function(suffix) {
   return [ prefix,
@@ -23,23 +27,19 @@ var packageUrl = function(suffix) {
   ].join('/')
 }
 
-var extractor = tar.extract(homedir)
+var download = function(suffix){
+  request
+    .get(packageUrl(suffix))
+    .pipe(zlib.createGunzip())
+    .pipe(extractor)
+}
 
 if(platform == 'linux' && arch == 'x64') {
-  request
-    .get(packageUrl('linux-x86_64'))
-    .pipe(zlib.createGunzip())
-    .pipe(extractor)
+  download('linux-x86_64')
 } else if (platform == 'linux') {
-  request
-    .get(packageUrl('linux-x86'))
-    .pipe(zlib.createGunzip())
-    .pipe(extractor)
+  download('linux-x86')
 } else if (platform == 'darwin') {
-  request
-    .get(packageUrl('linux-osx'))
-    .pipe(zlib.createGunzip())
-    .pipe(extractor)
+  download('osx')
 } else if (platform == 'win32') {
   console.log('Windows is not yet supported!')
 } else {
