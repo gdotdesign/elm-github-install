@@ -1,0 +1,27 @@
+{
+  "name": "elm-github-install",
+  "version": "0.1.3",
+  "description": "Install Elm packages directly from Git repositories",
+  "scripts": {
+    "install": "node scripts/install.js",
+    "run": "node scripts/run.js"
+  },
+  "bin": {
+    "elm-github-install": "scripts/run.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/gdotdesign/elm-github-install.git"
+  },
+  "dependencies": {
+    "request": "2.74.0",
+    "tar-fs": "1.15.0",
+    "shelljs": "0.7.5"
+  },
+  "author": "Gusztáv Szikszai",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gdotdesign/elm-github-install/issues"
+  },
+  "homepage": "https://github.com/gdotdesign/elm-github-install#readme"
+}

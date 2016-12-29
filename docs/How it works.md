@@ -27,7 +27,7 @@ Program flow
 
    ```
    {
-     "git@github.com:elm-lang/core": "5.0.0 <= 6.0.0",
+     "https://github.com/elm-lang/core": "5.0.0 <= 6.0.0",
      "git@bitbucket.com:gdotdesign/elm-ui": "development"
    }
    ```
@@ -44,5 +44,5 @@ Program flow
 
 7. Save cache.
 
-7. (If solution found) Populate `elm-stuff` and write
+8. (If solution found) Populate `elm-stuff` and write
    `elm-stuff/exact-dependecies.json`
