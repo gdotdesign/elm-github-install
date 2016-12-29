@@ -28,6 +28,9 @@ var packageUrl = function(suffix) {
 }
 
 var download = function(suffix){
+  console.log(
+    'Downloading and extracting the binary from: ' + packageUrl(suffix))
+
   request
     .get(packageUrl(suffix))
     .pipe(zlib.createGunzip())

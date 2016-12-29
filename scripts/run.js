@@ -15,7 +15,7 @@ var platform = os.platform()
 var arch = process.arch
 
 var execute = function(suffix) {
-  exec(executablePath(suffix), [ 'install' ], { stdio: 'inherit' })
+  exec(executablePath(suffix), [ process.argv.slice(2) ], { stdio: 'inherit' })
 }
 
 var executablePath = function(suffix) {
