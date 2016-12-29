@@ -14,9 +14,11 @@
     "url": "git+ssh://git@github.com/gdotdesign/elm-github-install.git"
   },
   "dependencies": {
+    "adm-zip": "^0.4.7",
     "request": "2.74.0",
+    "shelljs": "0.7.5",
     "tar-fs": "1.15.0",
-    "shelljs": "0.7.5"
+    "tmp": "^0.0.31"
   },
   "author": "Gusztáv Szikszai",
   "license": "ISC",

@@ -33,7 +33,7 @@ if(platform == 'linux' && arch == 'x64') {
 } else if (platform == 'darwin') {
   execute('linux-osx')
 } else if (platform == 'win32') {
-  console.log('Windows is not yet supported!')
+  exec(executablePath('win32') + '.bat', [ process.argv.slice(2) ], { stdio: 'inherit' })
 } else {
   console.log('Your operating system is not supported.')
 }

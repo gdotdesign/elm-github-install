@@ -1,8 +1,10 @@
 var request = require('request')
 var shell = require('shelljs')
+var AdmZip = require('adm-zip')
 var tar = require('tar-fs')
 var path = require('path')
 var zlib = require('zlib')
+var tmp = require('tmp')
 var fs = require('fs')
 var os = require('os')
 
@@ -44,7 +46,22 @@ if(platform == 'linux' && arch == 'x64') {
 } else if (platform == 'darwin') {
   download('osx')
 } else if (platform == 'win32') {
-  console.log('Windows is not yet supported!')
+  var tmpFile = tmp.fileSync()
+  var url =
+    [ prefix,
+      'v' + version,
+      'elm-install-' + version + '-win32.zip'
+    ].join('/')
+
+  console.log('Downloading and extracting the binary from: ' + url)
+
+  request
+    .get(url)
+    .pipe(fs.createWriteStream(tmpFile.name))
+    .on('finish', function(){
+      var zip = new AdmZip(tmpFile.name)
+      zip.extractAllTo(homedir)
+    })
 } else {
   console.log('Your operating system is not supported.')
 }
