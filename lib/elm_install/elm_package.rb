@@ -103,7 +103,7 @@ module ElmInstall
     def self.transform_package(key)
       GitCloneUrl.parse(key).to_s
     rescue
-      "git@github.com:#{key}"
+      "https://github.com/#{key}"
     end
   end
 end
