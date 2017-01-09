@@ -7,7 +7,8 @@
     "run": "node scripts/run.js"
   },
   "bin": {
-    "elm-github-install": "scripts/run.js"
+    "elm-github-install": "scripts/run.js",
+    "elm-install": "scripts/run.js"
   },
   "repository": {
     "type": "git",

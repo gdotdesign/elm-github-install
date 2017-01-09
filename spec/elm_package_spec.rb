@@ -8,7 +8,7 @@ describe ElmInstall::ElmPackage do
   let(:mismatch_path) { 'spec/fixtures/mismatched-elm-package.json' }
 
   context 'package mismatch' do
-    subject { described_class.dependencies(mismatch_path) }
+    subject { described_class.dependencies(mismatch_path, silent: false) }
 
     it 'should exit' do
       expect(ElmInstall::ElmPackage)
@@ -20,7 +20,7 @@ describe ElmInstall::ElmPackage do
   end
 
   context 'missing file' do
-    subject { described_class.dependencies('test') }
+    subject { described_class.dependencies('test', silent: false) }
 
     it 'should exit' do
       expect(ElmInstall::Logger)
@@ -34,7 +34,7 @@ describe ElmInstall::ElmPackage do
   end
 
   context 'invalid file' do
-    subject { described_class.dependencies(invalid_path) }
+    subject { described_class.dependencies(invalid_path, silent: false) }
 
     it 'should exit' do
       expect(ElmInstall::Logger)

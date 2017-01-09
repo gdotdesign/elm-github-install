@@ -7,8 +7,8 @@ module ElmInstall
     # @param path [String] The path for the file
     #
     # @return [Hash] The hash of dependenceis (url => version or ref)
-    def self.dependencies(path)
-      json = read path
+    def self.dependencies(path, options = { silent: true })
+      json = read path, options
       transform_dependencies(
         json['dependencies'].to_h,
         json['dependency-sources'].to_h
@@ -22,13 +22,23 @@ module ElmInstall
     # @param path [String] The path
     #
     # @return [Hash] The json
-    def self.read(path)
+    def self.read(path, options = { silent: true })
       JSON.parse(File.read(path))
     rescue JSON::ParserError
-      Logger.arrow "Invalid JSON in file: #{path.bold}."
-      Process.exit
+      exit "Invalid JSON in file: #{path.bold}.", options
     rescue Errno::ENOENT
-      Logger.arrow "Could not find file: #{path.bold}."
+      exit "Could not find file: #{path.bold}.", options
+    end
+
+    # Exits the current process with the given message.
+    #
+    # @param message [String] The message
+    # @param options [Hash] The options
+    #
+    # @return [void]
+    def self.exit(message, options)
+      return {} if options[:silent]
+      Logger.arrow message
       Process.exit
     end
 

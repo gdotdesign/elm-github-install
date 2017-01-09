@@ -111,7 +111,8 @@ module ElmInstall
     #
     # @return [Hash] The dependencies
     def dependencies
-      @dependencies ||= ElmPackage.dependencies 'elm-package.json'
+      @dependencies ||= ElmPackage.dependencies 'elm-package.json',
+                                                silent: false
     end
   end
 end
