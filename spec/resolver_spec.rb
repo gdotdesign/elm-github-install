@@ -37,7 +37,7 @@ describe ElmInstall::Resolver do
 
     expect(ElmInstall::Logger)
       .to receive(:arrow)
-      .with "Package: #{'git@github.com:base/core'.bold} not found in \
+      .with "Package: #{'https://github.com/base/core'.bold} not found in \
              cache, cloning...".gsub(/\s+/, ' ')
 
     allow_any_instance_of(Git::Remote)

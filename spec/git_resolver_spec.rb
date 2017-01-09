@@ -5,6 +5,27 @@ describe ElmInstall::GitResolver do
 
   let(:uri) { 'git@github.com:test/repo' }
 
+  context 'With cache' do
+    subject { described_class.new directory: 'spec/fixtures' }
+
+    describe '#save' do
+      it 'should save cache' do
+        expect(File).to receive(:binwrite)
+        subject.save
+      end
+    end
+
+    describe '#clear' do
+      it 'should clear the cache' do
+        expect do
+          subject.clear
+        end.to change {
+          subject.instance_variable_get('@check_cache').keys.count
+        }.from(2).to(0)
+      end
+    end
+  end
+
   describe '.repository' do
     let(:refs) { {} }
     let(:repo) { Git.init CACHE_DIRECTORY }

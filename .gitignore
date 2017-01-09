@@ -1,7 +1,7 @@
 node_modules
 elm-stuff
 tmp
-elm-package.json
+/elm-package.json
 pkg
 packaging/vendor
 packaging/elm-install*
@@ -9,5 +9,4 @@ packaging/traveling-ruby*
 coverage
 test.elm
 test.rb
-elm-package.json
 index.html
