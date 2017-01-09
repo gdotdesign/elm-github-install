@@ -43,6 +43,7 @@ namespace :package do
 
   desc 'Install gems to local directory'
   task :bundle_install do
+    sh 'rm -rf vendor'
     sh 'rm -rf tmp'
     sh 'mkdir tmp'
     sh 'cp Gemfile Gemfile.lock tmp/'
