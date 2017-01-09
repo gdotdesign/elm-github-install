@@ -99,10 +99,12 @@ used from the `elm-package.json` at that reference**.
 ## FAQ
 
 **Do I need to use SSH keys?**
+
 It dependes on your use case, but for public repositories in Github or Bitbucket
 it's not needed.
 
 **What url protocols are supported?**
+
 The following protocols can be used:
 
 * ssh://[user@]host.xz[:port]/path/to/repo.git/
@@ -111,6 +113,7 @@ The following protocols can be used:
 * [user@]host.xz:path/to/repo.git/
 
 **Can I install from private repositories?**
+
 Yes private repositories are supported provided you have authentication
 (for example SSH keys).
 
