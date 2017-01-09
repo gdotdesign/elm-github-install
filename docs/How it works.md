@@ -32,9 +32,15 @@ Program flow
    }
    ```
 
-3. Add dependencies to the cache, skipping if the package is already added.
+3. Add dependencies to the cache, skipping if the package is already added:
 
-4. Solved dependencies from the cache.
+   1. If a package is not added, it is cloned from it's remote repository into
+      the cache directory.
+
+   2. Tags are extracted and iterated over, checking out the tag, reading and
+      transforming it's the `elm-package.json` and adding it's dependecies (2.)
+
+4. Try to solve dependencies from the caches.
 
 5. (If no solution found) Go through the packages from the cache and update
    their references and if it changed update the repository (fetching new
@@ -45,4 +51,4 @@ Program flow
 7. Save cache.
 
 8. (If solution found) Populate `elm-stuff` and write
-   `elm-stuff/exact-dependecies.json`
+   `elm-stuff/exact-dependecies.json`.
