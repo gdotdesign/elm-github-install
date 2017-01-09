@@ -3,6 +3,7 @@
 [![Gem Version](https://badge.fury.io/rb/elm_install.svg)](https://badge.fury.io/rb/elm_install)
 [![Npm version](https://badge.fury.io/js/elm-github-install.svg)](https://badge.fury.io/js/elm-github-install)
 [![Code Climate](https://codeclimate.com/github/gdotdesign/elm-github-install/badges/gpa.svg)](https://codeclimate.com/github/gdotdesign/elm-github-install)
+[![Test Coverage](https://codeclimate.com/github/gdotdesign/elm-github-install/badges/coverage.svg)](https://codeclimate.com/github/gdotdesign/elm-github-install/coverage)
 [![Inline docs](http://inch-ci.org/github/gdotdesign/elm-github-install.svg?branch=master)](http://inch-ci.org/github/gdotdesign/elm-github-install)
 [![Build Status](https://travis-ci.org/gdotdesign/elm-github-install.svg?branch=master)](https://travis-ci.org/gdotdesign/elm-github-install)
 
