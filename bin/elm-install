@@ -19,3 +19,5 @@ command :install do |c|
                        cache_directory: options.cache_directory
   end
 end
+
+default_command :install
