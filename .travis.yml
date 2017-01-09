@@ -1,0 +1,6 @@
+language: ruby
+rvm:
+  - 2.2
+script:
+  - bundle exec rake ci
+  - CODECLIMATE_REPO_TOKEN=51f0c675a89cf2fe8cf0a840bf77c4724495b3b5fc4c55e23d428c498a7cc504 bundle exec codeclimate-test-reporter

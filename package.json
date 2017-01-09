@@ -1,11 +1,14 @@
 {
   "name": "elm-github-install",
-  "version": "0.2.0",
-  "description": "Install Elm packages directly from Github",
-  "main": "src/index.js",
-  "scripts": {},
+  "version": "0.3.0",
+  "description": "Install Elm packages directly from Git repositories",
+  "scripts": {
+    "install": "node scripts/install.js",
+    "run": "node scripts/run.js"
+  },
   "bin": {
-    "elm-github-install": "bin/index.js"
+    "elm-github-install": "scripts/run.js",
+    "elm-install": "scripts/run.js"
   },
   "repository": {
     "type": "git",
@@ -13,12 +16,10 @@
   },
   "dependencies": {
     "adm-zip": "^0.4.7",
-    "async": "1.5.2",
-    "colors": "1.1.2",
     "request": "2.74.0",
-    "semver": "5.3.0",
-    "semver-resolver": "0.4.0",
-    "tmp": "0.0.28"
+    "shelljs": "0.7.5",
+    "tar-fs": "1.15.0",
+    "tmp": "^0.0.31"
   },
   "author": "Gusztáv Szikszai",
   "license": "ISC",

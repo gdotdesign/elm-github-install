@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "test/repo": "2.0.0 <= v < 3.0.0",
+    "base/core": "2.0.0 <= v < 3.0.0"
+  },
+  "dependency-sources": {
+    "test/repo": {
+      "url": "git@some-domain.com:test/repo",
+      "ref": "development"
+    }
+  }
+}

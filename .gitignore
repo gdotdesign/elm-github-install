@@ -1,1 +1,12 @@
 node_modules
+elm-stuff
+tmp
+/elm-package.json
+pkg
+packaging/vendor
+packaging/elm-install*
+packaging/traveling-ruby*
+coverage
+test.elm
+test.rb
+index.html

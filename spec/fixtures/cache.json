@@ -1,0 +1,8 @@
+{
+  "https://github.com/base/core": {
+    "1.0.0": []
+  },
+  "https://github.com/test/test": {
+    "1.0.0": [["https://github.com/base/core",">= 1.0.0"]]
+  }
+}

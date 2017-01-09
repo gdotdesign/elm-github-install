@@ -1,0 +1,4 @@
+TooManyStatements:
+  max_statements: 7
+InstanceVariableAssumption:
+  enabled: false
