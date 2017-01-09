@@ -62,4 +62,14 @@ describe ElmInstall::Resolver do
       'git@github.com:base/core' => '1.0.0 <= v < 2.0.0'
     )
   end
+
+  describe '#elm_dependencies' do
+    it 'should return empty hash on error' do
+      expect(ElmInstall::ElmPackage)
+        .to receive(:read)
+        .and_raise 'test'
+
+      expect(subject.elm_dependencies('test')).to eq({})
+    end
+  end
 end
