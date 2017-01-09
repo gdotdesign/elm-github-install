@@ -111,7 +111,7 @@ module ElmInstall
     #
     # @return [String] The url
     def self.transform_package(key)
-      GitCloneUrl.parse(key).to_s
+      GitCloneUrl.parse(key).to_s.gsub(/\.git$/, '')
     rescue
       "https://github.com/#{key}"
     end
