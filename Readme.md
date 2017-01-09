@@ -20,7 +20,7 @@ gem install elm-install
 ```
 
 If you have npm installed on your machine then you can install it directly from
-[npm](https://www.npmjs.com/package/elm-github-install)
+[npm](https://www.npmjs.com/package/elm-github-install):
 
 ```
 npm install elm-github-install -g
@@ -47,7 +47,7 @@ replacement:
 ```
 
 Command:
-```sh
+```
 $ elm-install
 
 Resolving packages...
@@ -98,13 +98,12 @@ used from the `elm-package.json` at that reference**.
 
 ## FAQ
 
-**Do I need to use SSH keys?**
+#### Do I need to use SSH keys?
 
 It dependes on your use case, but for public repositories in Github or Bitbucket
 it's not needed.
 
-**What url protocols are supported?**
-
+#### What url protocols are supported?
 The following protocols can be used:
 
 * ssh://[user@]host.xz[:port]/path/to/repo.git/
@@ -112,8 +111,7 @@ The following protocols can be used:
 * http[s]://host.xz[:port]/path/to/repo.git/
 * [user@]host.xz:path/to/repo.git/
 
-**Can I install from private repositories?**
-
+#### Can I install from private repositories?
 Yes private repositories are supported provided you have authentication
 (for example SSH keys).
 
