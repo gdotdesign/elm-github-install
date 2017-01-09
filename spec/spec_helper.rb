@@ -9,6 +9,7 @@ RSpec.configure do |config|
 
   config.after do
     FileUtils.rm_rf CACHE_DIRECTORY
+    FileUtils.rm_rf 'elm-stuff'
   end
 end
 

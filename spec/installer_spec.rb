@@ -23,6 +23,18 @@ describe ElmInstall::Installer do
       expect(subject)
         .to receive(:puts)
         .exactly(4).times
+
+      expect(File)
+        .to receive(:binwrite)
+        .with('spec/fixtures/cache/ref-cache.json', any_args)
+
+      expect(File)
+        .to receive(:binwrite)
+        .with('spec/fixtures/cache/cache.json', any_args)
+
+      expect(File)
+        .to receive(:binwrite)
+        .with('elm-stuff/exact-dependencies.json', any_args)
     end
 
     it 'should install dependencies' do
