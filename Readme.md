@@ -4,6 +4,7 @@
 [![Npm version](https://badge.fury.io/js/elm-github-install.svg)](https://badge.fury.io/js/elm-github-install)
 [![Code Climate](https://codeclimate.com/github/gdotdesign/elm-github-install/badges/gpa.svg)](https://codeclimate.com/github/gdotdesign/elm-github-install)
 [![Inline docs](http://inch-ci.org/github/gdotdesign/elm-github-install.svg?branch=master)](http://inch-ci.org/github/gdotdesign/elm-github-install)
+[![Build Status](https://travis-ci.org/gdotdesign/elm-github-install.svg?branch=master)](https://travis-ci.org/gdotdesign/elm-github-install)
 
 This gem allows you to install Elm packages **directly from any Git repository
 (even private ones)**, bypassing the package repository (package.elm-lang.org)
