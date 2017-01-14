@@ -17,7 +17,7 @@ installed.
 If you have ruby installed on your machine then you can install it directy from
 [rubygems.org](https://rubygems.org/gems/elm_install):
 ```
-gem install elm-install
+gem install elm_install
 ```
 
 If you have npm installed on your machine then you can install it directly from
