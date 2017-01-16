@@ -31,7 +31,7 @@ if(platform == 'linux' && arch == 'x64') {
 } else if (platform == 'linux') {
   execute('linux-x86')
 } else if (platform == 'darwin') {
-  execute('linux-osx')
+  execute('osx')
 } else if (platform == 'win32') {
   exec(executablePath('win32') + '.bat', [ process.argv.slice(2) ], { stdio: 'inherit' })
 } else {
