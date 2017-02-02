@@ -24,16 +24,5 @@ module ElmInstall
         "#{prefix} #{match[1]}" if match
       end.compact
     end
-
-    # Returns the path for a package with the given version.
-    #
-    # @param package [String] The package
-    # @param version [String] The version
-    #
-    # @return [Strin] The path
-    def package_version_path(package, version)
-      package_name = GitCloneUrl.parse(package).path.sub(%r{^/}, '')
-      [package_name, File.join('elm-stuff', 'packages', package_name, version)]
-    end
   end
 end

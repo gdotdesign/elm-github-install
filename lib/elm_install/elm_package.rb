@@ -7,11 +7,12 @@ module ElmInstall
     # @param path [String] The path for the file
     #
     # @return [Hash] The hash of dependenceis (url => version or ref)
-    def self.dependencies(path, options = { silent: true })
+    def self.dependencies(path, sources, options = { silent: true })
       json = read path, options
       transform_dependencies(
         json['dependencies'].to_h,
-        json['dependency-sources'].to_h
+        json['dependency-sources'].to_h,
+        sources
       )
     end
 
@@ -49,11 +50,11 @@ module ElmInstall
     # @param sources [Hash] The sources for the dependencies
     #
     # @return [Hash] The dependencies
-    def self.transform_dependencies(raw_dependencies, sources)
+    def self.transform_dependencies(raw_dependencies, dep_sources, sources)
       raw_dependencies.each_with_object({}) do |(package, constraint), memo|
-        value = sources.fetch(package, package)
+        value = dep_sources.fetch(package, nil)
 
-        transform_dependency package, value, constraint, memo
+        transform_dependency package, value, constraint, memo, sources
       end
     end
 
@@ -68,41 +69,16 @@ module ElmInstall
     # @param memo [Hash] The hash to save the dependency to
     #
     # @return [Hash] The memo object
-    def self.transform_dependency(package, value, constraint, memo)
+    def self.transform_dependency(package, value, constraint, memo, sources)
       if value.is_a?(Hash)
-        check_path package, value['url']
-        memo[value['url']] = value['ref']
+        sources[package] = value
+        memo[package] = value['ref']
+      elsif value.is_a?(String)
+        sources[package] = transform_package(value)
+        memo[package] = constraint
       else
-        url = transform_package(value)
-        check_path package, url
-        memo[url] = constraint
+        memo[package] = constraint
       end
-    end
-
-    # Checks if the given url matches the given package.
-    #
-    # :reek:DuplicateMethodCall
-    #
-    # @param package [String] The package
-    # @param url [String] The url
-    #
-    # @return [void]
-    def self.check_path(package, url)
-      uri = GitCloneUrl.parse(url)
-      path = uri.path.sub(%r{^/}, '')
-
-      return if path == package
-
-      puts "
-  The source of package #{package.bold} is set to #{url.bold} which would
-  be install to #{"elm-stuff/#{path}".bold}. This would cause a conflict
-  when trying to compile anything.
-
-  The name of a package must match the source url's path.
-
-  #{package.bold} <=> #{path.bold}
-      "
-      Process.exit
     end
 
     # Transforms a package to it's url for if needed.

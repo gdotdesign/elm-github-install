@@ -2,6 +2,7 @@ require_relative './resolver'
 require_relative './elm_package'
 require_relative './git_resolver'
 require_relative './graph_builder'
+require_relative './sources'
 require_relative './populator'
 
 module ElmInstall
@@ -15,8 +16,9 @@ module ElmInstall
     def initialize(options)
       init_options options
       @git_resolver = GitResolver.new directory: cache_directory
+      @sources = Sources.new
+      @populator = Populator.new @git_resolver, @sources
       @cache = Cache.new directory: cache_directory
-      @populator = Populator.new @git_resolver
       @options = options
     end
 
@@ -94,7 +96,7 @@ module ElmInstall
     #
     # @return [Resolver] The resolver
     def resolver
-      @resolver ||= Resolver.new @cache, @git_resolver
+      @resolver ||= Resolver.new @cache, @git_resolver, @sources
     end
 
     # Returns the solution for the given `elm-package.json` file.
@@ -112,6 +114,7 @@ module ElmInstall
     # @return [Hash] The dependencies
     def dependencies
       @dependencies ||= ElmPackage.dependencies 'elm-package.json',
+                                                @sources,
                                                 silent: false
     end
   end
