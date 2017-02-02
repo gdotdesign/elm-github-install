@@ -4,8 +4,9 @@ module ElmInstall
     # Initializes a new populator.
     #
     # @param git_resolver [GitResolver] The git resolver to use.
-    def initialize(git_resolver)
+    def initialize(git_resolver, sources)
       @git_resolver = git_resolver
+      @sources = sources
     end
 
     # Populates `elm-stuff` from the given solution.
@@ -33,11 +34,19 @@ module ElmInstall
     def resolve_package(package, version_str)
       version, ref = self.class.version_and_ref(version_str)
 
-      package_name, package_path = Utils.package_version_path package, version
+      package_path = File.join('elm-stuff', 'packages', package, version)
 
-      @git_resolver.repository(package).checkout(ref)
+      source_url = @sources.resolve(package)
 
-      Logger.dot "#{package_name.bold} - #{version.bold} (#{ref})"
+      message = ''
+      message += ref.bold if version_str =~ /\+/
+      message += '@' + source_url.bold unless source_url.start_with?('https://github.com/elm-lang')
+
+      final_message = message.empty? ? '' : "(#{message})"
+
+      @git_resolver.repository(source_url).checkout(ref)
+
+      Logger.dot "#{package.bold} - #{version.bold} #{final_message}"
 
       FileUtils.rm_rf(package_path) if Dir.exist?(package_path)
 
@@ -51,7 +60,7 @@ module ElmInstall
     #
     # @return [void]
     def copy_package(package, package_path)
-      repository_path = File.join(@git_resolver.repository_path(package), '.')
+      repository_path = File.join(@git_resolver.repository_path(@sources.resolve(package)), '.')
 
       FileUtils.mkdir_p(package_path)
       FileUtils.cp_r(repository_path, package_path)
@@ -79,7 +88,7 @@ module ElmInstall
       solution.each_with_object({}) do |(key, value), memo|
         version, = version_and_ref value
 
-        memo[GitCloneUrl.parse(key).path.sub(%r{^/}, '')] = version
+        memo[key] = version
       end
     end
 

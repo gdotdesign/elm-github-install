@@ -58,6 +58,7 @@ module ElmInstall
     #
     # @return [String] The path
     def repository_path(url)
+      return url.sub('file://', '') if url.start_with?('file://')
       uri = GitCloneUrl.parse(url)
       File.join(directory, uri.host, uri.path)
     end

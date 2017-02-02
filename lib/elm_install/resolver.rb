@@ -11,8 +11,9 @@ module ElmInstall
     #
     # @param cache [Cache] The cache
     # @param git_resolver [GitResolver] The git resolver
-    def initialize(cache, git_resolver)
+    def initialize(cache, git_resolver, sources)
       @git_resolver = git_resolver
+      @sources = sources
       @constraints = []
       @cache = cache
     end
@@ -56,7 +57,7 @@ module ElmInstall
     #
     # @return [void]
     def add_ref_dependency(package, ref)
-      @git_resolver.repository(package).checkout(ref)
+      @git_resolver.repository(@sources.resolve(package)).checkout(ref)
       pkg_version = elm_package(package)['version']
       version = "#{pkg_version}+#{ref}"
       @cache.ensure_version(package, version)
@@ -74,10 +75,12 @@ module ElmInstall
     #
     # @return [void]
     def add_package(package)
-      return if @git_resolver.package?(package) && @cache.key?(package)
+      url = @sources.resolve(package)
+
+      return if @git_resolver.package?(url) && @cache.key?(package)
 
       @git_resolver
-        .repository(package)
+        .repository(url)
         .tags
         .map(&:name)
         .each do |version|
@@ -107,7 +110,7 @@ module ElmInstall
     # @return [void]
     def add_version(package, version)
       @git_resolver
-        .repository(package)
+        .repository(@sources.resolve(package))
         .checkout(version)
 
       add_package_dependencies(package, version)
@@ -119,7 +122,7 @@ module ElmInstall
     #
     # @return [Hash] The dependencies
     def elm_dependencies(package)
-      ElmPackage.dependencies elm_package_path(package)
+      ElmPackage.dependencies elm_package_path(package), @sources
     rescue
       {}
     end
@@ -139,7 +142,7 @@ module ElmInstall
     #
     # @return [String] The path
     def elm_package_path(package)
-      File.join(@git_resolver.repository_path(package), 'elm-package.json')
+      File.join(@git_resolver.repository_path(@sources.resolve(package)), 'elm-package.json')
     end
   end
 end
