@@ -60,7 +60,6 @@ module ElmInstall
     def save
       puts 'Saving package cache...'
       @git_resolver.save
-      @sources.save
       @cache.save
     end
 
