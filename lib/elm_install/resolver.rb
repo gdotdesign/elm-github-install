@@ -61,13 +61,22 @@ module ElmInstall
     def fetch(version)
       repo = open
       repo.checkout(version)
+      dir(repo)
+    end
+
+    def dir(repo)
       # Remove .git from filename
       Dir.new(File.dirname(repo.repo.path))
     end
 
     # Copies the version into the given directory
-    Contract Semverse::Version, Dir => None
+    Contract Semverse::Version, Dir => nil
     def copy_to(version, directory)
+      repo = open
+      repo.checkout version.to_simple
+      FileUtils.cp_r("#{dir(repo).path}/.", directory)
+      FileUtils.rm_rf(File.join(directory, '.git'))
+      nil
     end
 
     def versions
@@ -75,18 +84,6 @@ module ElmInstall
       repo
         .tags
         .map(&:name)
-        .map { |tag| Semverse::Version.try_new tag }
-        .compact
-    end
-
-    # Returns all available versions for a package
-    Contract ArrayOf[Semverse::Version]
-    def remote_versions
-
-      refs = Git.ls_remote url
-      refs.delete 'head'
-      refs['tags']
-        .keys
         .map { |tag| Semverse::Version.try_new tag }
         .compact
     end
@@ -132,6 +129,7 @@ module ElmInstall
     extend Forwardable
 
     attr_reader :constraints
+    attr_accessor :version
     attr_reader :source
     attr_reader :name
 
@@ -208,7 +206,10 @@ module ElmInstall
 
   # Resolves dependencies
   class Resolver < Base
+    attr_reader :dependencies
+
     def initialize(identifier)
+      @dependencies = {}
       @graph = Solve::Graph.new
       @identifier = identifier
     end
@@ -225,6 +226,8 @@ module ElmInstall
 
     def resolve_dependency(dependency)
       return if @graph.artifacts_by_name.key?(dependency.name)
+
+      @dependencies[dependency.name] ||= dependency
 
       dependency
         .source
@@ -264,28 +267,38 @@ module ElmInstall
       end
       .flatten(1)
 
-      results = Solve.it!(@graph, initial)
+      results =
+        Solve
+          .it!(@graph, initial)
+          .map { |name, version|
+            dep = @resolver.dependencies[name]
+            dep.version = Semverse::Version.new(version)
+            dep
+          }
+
+      (Populator.new results).populate
     end
   end
 
   # Populator for 'elm-stuff' directory
   class Populator < Base
     # Initializes a new populator
-    Contract [Dependency]
+    Contract ArrayOf[Dependency] => Populator
     def initialize(dependencies)
       @dependencies = dependencies
+      self
     end
 
     # Populates 'elm-stuff'
-    Contract None => None
+    Contract None => Int
     def populate
       copy_dependencies
       write_exact_dependencies
     end
 
     # Writes the 'elm-stuff/exact-dependencies.json'
-    Contract None => None
-    def write_exact_dependencies(dependencies)
+    Contract None => Int
+    def write_exact_dependencies
       File.binwrite(
         File.join('elm-stuff', 'exact-dependencies.json'),
         JSON.pretty_generate(exact_dependencies)
@@ -295,18 +308,26 @@ module ElmInstall
     # Returns the contents for 'elm-stuff/exact-dependencies.json'
     Contract None => HashOf[String => String]
     def exact_dependencies
-      @dependencies.each_with_object({}) do |dependency, version|
-        verion.to_simple
+      @dependencies.each_with_object({}) do |dependency, memo|
+        memo[dependency.name] = dependency.version.to_simple
       end
     end
 
     # Copies dependencies to `elm-stuff/packages/package/version` directory
-    Contract None => None
+    Contract None => Any
     def copy_dependencies
       @dependencies.each do |dependency|
-        dependency.source.copy_to(
-          File.join('elm-stuff', 'packages', dependency.name, version.to_simple)
-        )
+        path =
+          File.join(
+            'elm-stuff',
+            'packages',
+            dependency.name,
+            dependency.version.to_simple
+          )
+
+        FileUtils.mkdir_p path
+
+        dependency.source.copy_to(dependency.version, Dir.new(path))
       end
     end
   end
