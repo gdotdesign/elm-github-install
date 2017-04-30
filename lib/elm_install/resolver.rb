@@ -1,145 +1,313 @@
-require_relative './cache'
-require_relative './utils'
+module Semverse
+  class Version
+    def to_simple
+      "#{major}.#{minor}.#{patch}"
+    end
+
+    def self.try_new(version)
+      new version
+    rescue
+      nil
+    end
+  end
+end
+
+module Solve
+  class Graph
+    attr_reader :artifacts_by_name
+  end
+end
 
 module ElmInstall
-  # Resolves git dependencies into the cache.
-  class Resolver
-    # @return [Array] The constraints
-    attr_reader :constraints
+  class Base
+    include Contracts::Core
+    include Contracts::Builtin
+  end
 
-    # Initializes a resolver with a chace and git resolver.
-    #
-    # @param cache [Cache] The cache
-    # @param git_resolver [GitResolver] The git resolver
-    def initialize(cache, git_resolver)
-      @git_resolver = git_resolver
-      @constraints = []
-      @cache = cache
-    end
+  Branch = ADT do
+    Just(ref: name) |
+    Nothing()
+  end
 
-    # Add constraints, usually from the `elm-package.json`.
-    #
-    # @param constraints [Hash] The constraints
-    #
-    # @return [void]
-    def add_constraints(constraints)
-      @constraints = add_dependencies(constraints) do |package, constraint|
-        [package, constraint]
+  Uri = ADT do
+    Ssh(uri: URI::SshGit::Generic) |
+    Http(uri: URI::HTTP)
+  end
+
+  Type = ADT do
+    Git(uri: Uri, branch: Branch) {
+      def source
+        Source.new uri, branch
       end
-    end
-
-    # Adds dependencies, usually from any `elm-package.json` file.
-    #
-    # :reek:NestedIterators { max_allowed_nesting: 2 }
-    #
-    # @param dependencies [Hash] The dependencies
-    #
-    # @yieldreturn [Array] A constraint
-    # @return [void]
-    def add_dependencies(dependencies)
-      dependencies.flat_map do |package, constraint|
-        add_package(package)
-
-        constraints = Utils.transform_constraint(constraint)
-        next add_ref_dependency(package, constraint) if constraints.empty?
-
-        constraints.map do |dependency|
-          yield package, dependency
-        end
+    } |
+    Directory(path: Dir) {
+      def source
       end
+    } |
+    Registry(source: Class)
+  end
+
+  # Abstract class for resolving
+  class Source < Base
+    Contract Uri, Branch => Source
+    def initialize(uri, branch)
+      @brach = branch
+      @uri = uri
+      self
     end
 
-    # Adds a dependency by git reference.
-    #
-    # @param package [String] The package
-    # @param ref [String] The reference
-    #
-    # @return [void]
-    def add_ref_dependency(package, ref)
-      @git_resolver.repository(package).checkout(ref)
-      pkg_version = elm_package(package)['version']
-      version = "#{pkg_version}+#{ref}"
-      @cache.ensure_version(package, version)
-      add_package_dependencies(package, version)
-      [[package, "= #{version}"]]
+    # Downloads the version into a temporary directory
+    Contract Semverse::Version => Dir
+    def fetch(version)
+      repo = open
+      repo.checkout(version)
+      # Remove .git from filename
+      Dir.new(File.dirname(repo.repo.path))
     end
 
-    # Adds a package to the cache, the following things happens:
-    # * If there is no local repository it will be cloned
-    # * Getting all the tags and adding the valid ones to the cache
-    # * Checking out and getting the `elm-package.json` for each version
-    #   and adding them recursivly
-    #
-    # @param package [String] The package
-    #
-    # @return [void]
-    def add_package(package)
-      return if @git_resolver.package?(package) && @cache.key?(package)
+    # Copies the version into the given directory
+    Contract Semverse::Version, Dir => None
+    def copy_to(version, directory)
+    end
 
-      @git_resolver
-        .repository(package)
+    def versions
+      repo = open
+      repo
         .tags
         .map(&:name)
-        .each do |version|
-          @cache.ensure_version(package, version)
-          add_version(package, version)
-        end
+        .map { |tag| Semverse::Version.try_new tag }
+        .compact
     end
 
-    # Adds a package's dependencies to the cache.
-    #
-    # @param package [String] The package
-    # @param version [String] The version
-    #
-    # @return [void]
-    def add_package_dependencies(package, version)
-      add_dependencies(elm_dependencies(package)) do |dep_package, constraint|
-        add_package(dep_package)
-        @cache.dependency(package, version, [dep_package, constraint])
+    # Returns all available versions for a package
+    Contract ArrayOf[Semverse::Version]
+    def remote_versions
+
+      refs = Git.ls_remote url
+      refs.delete 'head'
+      refs['tags']
+        .keys
+        .map { |tag| Semverse::Version.try_new tag }
+        .compact
+    end
+
+    def cache_file_path
+      case @uri
+      when Uri::Http
+        File.join('.cache', @uri.uri.path.sub(%r{^/}, '') + '.versions' )
       end
     end
 
-    # Adds a version and it's dependencies to the cache.
-    #
-    # @param package [String] The package
-    # @param version [String] The version
-    #
-    # @return [void]
-    def add_version(package, version)
-      @git_resolver
-        .repository(package)
-        .checkout(version)
-
-      add_package_dependencies(package, version)
+    def url
+      case @uri
+      when Uri::Http
+        @uri.uri.to_s
+      end
     end
 
-    # Gets the `elm-package.json` for a package.
-    #
-    # @param package [String] The package
-    #
-    # @return [Hash] The dependencies
-    def elm_dependencies(package)
-      ElmPackage.dependencies elm_package_path(package)
-    rescue
-      {}
+    def path
+      case @uri
+      when Uri::Http
+        File.join('.cache', @uri.uri.path.sub(%r{^/}, ''))
+      end
     end
 
-    # Retruns the contents of the `elm-pacakge.json` of the given package.
-    #
-    # @param package [String] The package
-    #
-    # @return [Hash] The contents
-    def elm_package(package)
-      ElmPackage.read elm_package_path(package)
+    def open
+      return clone url, path unless Dir.exist?(path)
+
+      repo = Git.open path
+      repo.reset_hard
+      repo
     end
 
-    # Retruns the path of the `elm-pacakge.json` of the given package.
-    #
-    # @param package [String] The package
-    #
-    # @return [String] The path
-    def elm_package_path(package)
-      File.join(@git_resolver.repository_path(package), 'elm-package.json')
+    def clone(url, path)
+      Logger.arrow "Package: #{url.bold} not found in cache, cloning..."
+      FileUtils.mkdir_p path
+      Git.clone(url, path)
+    end
+  end
+
+  # Dependency
+  class Dependency < Base
+    extend Forwardable
+
+    attr_reader :constraints
+    attr_reader :source
+    attr_reader :name
+
+    # Initializes a new dependency
+    Contract String, Source, ArrayOf[Solve::Constraint] => Dependency
+    def initialize(name, source, constraints)
+      @constraints = constraints
+      @source = source
+      @name = name
+      self
+    end
+
+    Contract [Solve::Constraint] => Dependency
+    def with_different_constraints(constraints)
+      self.class.new name, source, constraints
+    end
+  end
+
+  # Identifies dependencies
+  class Identifier < Base
+    attr_reader :options
+
+    # Initialize a new identifier.
+    # - Initial dependencies are required to
+    #   resolve conflicts from different types.
+    Contract ArrayOf[Dependency] => Identifier
+    def initialize(initial_dependencies)
+      @initial_dependencies = initial_dependencies
+      @options = {}
+      self
+    end
+
+    # Identifies dependencies from a directory
+    Contract Dir => ArrayOf[Dependency]
+    def identify(directory)
+      raw = json(directory)
+
+      dependencies = raw['dependencies'].to_h
+      dependency_sources = raw['dependency-sources'].to_h
+
+      dependencies.map do |package, constraint|
+        constraints = Utils.transform_constraint constraint
+
+        type =
+          if dependency_sources.key?(package) then
+            # TODO: Handle different source
+          else
+            uri = GitCloneUrl.parse("https://github.com/#{package}")
+            if uri.is_a?(URI::HTTP)
+              Type::Git(Uri::Http(uri), Branch::Nothing())
+            end
+          end
+
+        Dependency.new(package, type.source, constraints)
+      end
+    end
+
+    Contract Dir => HashOf[String => Any]
+    def json(directory)
+      path = File.join(directory, 'elm-package.json')
+      JSON.parse(File.read(path))
+    rescue JSON::ParserError
+      exit "Invalid JSON in file: #{path.bold}", options
+    rescue Errno::ENOENT
+      exit "Could not find file: #{path.bold}", options
+    end
+
+    def exit(message, options)
+      return {} if options[:silent]
+      Logger.arrow message
+      Process.exit
+    end
+  end
+
+  # Resolves dependencies
+  class Resolver < Base
+    def initialize(identifier)
+      @graph = Solve::Graph.new
+      @identifier = identifier
+    end
+
+    # Resolves the constraints for a version
+    Contract ArrayOf[Dependency] => Solve::Graph
+    def resolve(dependencies)
+      dependencies.each do |dependency|
+        resolve_dependency dependency
+      end
+
+      @graph
+    end
+
+    def resolve_dependency(dependency)
+      return if @graph.artifacts_by_name.key?(dependency.name)
+
+      dependency
+        .source
+        .versions
+        .each do |version|
+          resolve_dependencies(dependency, version)
+        end
+    end
+
+    def resolve_dependencies(main, version)
+      dependencies = @identifier.identify(main.source.fetch(version))
+      artifact = @graph.artifact main.name, version
+
+      dependencies.each do |dependency|
+        dependency.constraints.each do |constraint|
+          artifact.depends dependency.name, constraint
+        end
+
+        resolve_dependency dependency
+      end
+    end
+  end
+
+  class Installer < Base
+    def initialize
+      @identifier = Identifier.new []
+      @resolver = Resolver.new @identifier
+
+      @initial_dependencies = @identifier.identify Dir.new(Dir.pwd)
+
+      @graph = @resolver.resolve @initial_dependencies
+
+      initial = @initial_dependencies.map do |dependency|
+        dependency.constraints.map do |constraint|
+          [dependency.name, constraint]
+        end
+      end
+      .flatten(1)
+
+      results = Solve.it!(@graph, initial)
+    end
+  end
+
+  # Populator for 'elm-stuff' directory
+  class Populator < Base
+    # Initializes a new populator
+    Contract [Dependency]
+    def initialize(dependencies)
+      @dependencies = dependencies
+    end
+
+    # Populates 'elm-stuff'
+    Contract None => None
+    def populate
+      copy_dependencies
+      write_exact_dependencies
+    end
+
+    # Writes the 'elm-stuff/exact-dependencies.json'
+    Contract None => None
+    def write_exact_dependencies(dependencies)
+      File.binwrite(
+        File.join('elm-stuff', 'exact-dependencies.json'),
+        JSON.pretty_generate(exact_dependencies)
+      )
+    end
+
+    # Returns the contents for 'elm-stuff/exact-dependencies.json'
+    Contract None => HashOf[String => String]
+    def exact_dependencies
+      @dependencies.each_with_object({}) do |dependency, version|
+        verion.to_simple
+      end
+    end
+
+    # Copies dependencies to `elm-stuff/packages/package/version` directory
+    Contract None => None
+    def copy_dependencies
+      @dependencies.each do |dependency|
+        dependency.source.copy_to(
+          File.join('elm-stuff', 'packages', dependency.name, version.to_simple)
+        )
+      end
     end
   end
 end
