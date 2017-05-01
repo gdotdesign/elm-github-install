@@ -5,11 +5,11 @@ module ElmInstall
     attr_reader :options
 
     # Initialize a new identifier.
-    Contract Dir => Identifier
-    def initialize(directory)
+    Contract Dir, Hash => Identifier
+    def initialize(directory, options = {})
+      @options = options
       @dependency_sources = dependency_sources directory
       @initial_dependencies = identify directory
-      @options = {}
       self
     end
 
@@ -45,13 +45,18 @@ module ElmInstall
             when Hash
               uri_type source['url'], Branch::Just(source['ref'])
             when String
-              uri_type source, Branch::Just('master')
+              if File.exists?(source)
+                Type::Directory(Dir.new(source))
+              else
+                uri_type source, Branch::Just('master')
+              end
             end
           else
             Type::Git(Uri::Github(package), Branch::Nothing())
           end
 
         type.source.identifier = self
+        type.source.options = @options
 
         Dependency.new(package, type.source, constraints)
       end

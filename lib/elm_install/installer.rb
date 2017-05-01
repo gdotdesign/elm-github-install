@@ -1,7 +1,7 @@
 module ElmInstall
   class Installer < Base
-    def initialize
-      @identifier = Identifier.new Dir.new(Dir.pwd)
+    def initialize(options = {})
+      @identifier = Identifier.new Dir.new(Dir.pwd), options
       @resolver = Resolver.new @identifier
 
       puts "Resolving packages..."

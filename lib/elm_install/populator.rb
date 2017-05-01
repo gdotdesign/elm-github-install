@@ -32,7 +32,7 @@ module ElmInstall
       end
     end
 
-    # Copies dependencies to `elm-stuff/packages/package/version` directory
+    # Copies dependencies to 'elm-stuff/packages/package/version' directory
     Contract None => Any
     def copy_dependencies
       @dependencies.each do |dependency|
@@ -47,6 +47,8 @@ module ElmInstall
         log = "#{dependency.name} - "
 
         case dependency.source
+        when DirectorySource
+          log += "#{dependency.source.dir.path} (#{dependency.version.to_simple})"
         when GitSource
           case dependency.source.uri
           when Uri::Github

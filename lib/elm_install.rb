@@ -19,6 +19,7 @@ require_relative './elm_install/ext'
 require_relative './elm_install/base'
 require_relative './elm_install/types'
 require_relative './elm_install/source'
+require_relative './elm_install/directory_source'
 require_relative './elm_install/git_source'
 require_relative './elm_install/dependency'
 require_relative './elm_install/identifier'
@@ -36,6 +37,6 @@ module ElmInstall
   #
   # @return [void]
   def install(options = { verbose: false })
-    Installer.new
+    Installer.new options
   end
 end

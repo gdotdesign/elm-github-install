@@ -1,7 +1,6 @@
 module ElmInstall
   # Git Source
   class GitSource < Source
-    attr_accessor :identifier
     attr_reader :uri, :branch
 
     # Initializes a git source by URI and branch
@@ -88,11 +87,11 @@ module ElmInstall
     def path
       case @uri
       when Uri::Github
-        File.join('.cache', @uri.name)
+        File.join(options[:cache_directory], @uri.name)
       when Uri::Ssh
-        File.join('.cache', @uri.uri.path.sub(%r{^/}, ''))
+        File.join(options[:cache_directory], @uri.uri.path.sub(%r{^/}, ''))
       when Uri::Http
-        File.join('.cache', @uri.uri.path.sub(%r{^/}, ''))
+        File.join(options[:cache_directory], @uri.uri.path.sub(%r{^/}, ''))
       end
     end
 

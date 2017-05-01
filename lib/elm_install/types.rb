@@ -18,6 +18,7 @@ module ElmInstall
     } |
     Directory(path: Dir) {
       def source
+        @source ||= DirectorySource.new path
       end
     } |
     Registry(source: Class)
