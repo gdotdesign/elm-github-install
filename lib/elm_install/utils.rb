@@ -15,15 +15,13 @@ module ElmInstall
     }.freeze
 
     Contract String => [Solve::Constraint]
-    def transform_constraint(constraint)
-      constraint.gsub!(/\s/, '')
+    def transform_constraint(elm_constraint)
+      elm_constraint.gsub!(/\s/, '')
 
       CONVERTERS
-        .map do |regexp, prefix|
-          match = constraint.match(regexp)
-          "#{prefix} #{match[1]}" if match
-        end
-        .compact
+        .map { |regexp, prefix| [elm_constraint.match(regexp), prefix] }
+        .select { |(match)| match }
+        .map { |(match, prefix)| "#{prefix} #{match[1]}" }
         .map { |constraint| Solve::Constraint.new constraint }
     end
   end

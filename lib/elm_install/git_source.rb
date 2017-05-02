@@ -20,19 +20,10 @@ module ElmInstall
         when Branch::Just
           @branch.ref
         when Branch::Nothing
-          version
+          version.to_simple
         end
 
-      repository.reset_hard
       repository.checkout ref
-      repository_directory
-    end
-
-    # Returns the directory of the repository
-    Contract None => Dir
-    def repository_directory
-      # This removes the .git from filename
-      Dir.new(File.dirname(repository.repo.path))
     end
 
     # Copies the version into the given directory
@@ -59,38 +50,31 @@ module ElmInstall
     def versions(constraints)
       case @branch
       when Branch::Just
-        [ identifier.version(fetch(@branch.ref)) ]
+        [identifier.version(fetch(@branch.ref))]
       when Branch::Nothing
         matches = matching_versions constraints
         return matches if matches.any?
-        Logger.arrow "Could not find matching versions for: #{package_name.bold} in cache. Fetching updates."
+        Logger.arrow(
+          "Could not find matching versions for: #{package_name.bold}"\
+          ' in cache. Fetching updates.'
+        )
         repository.fetch
         matching_versions constraints
       end
     end
 
-    def all_versions
-      repository
-        .tags
-        .map(&:name)
-        .map { |tag| Semverse::Version.try_new tag }
-        .compact
-    end
-
     def matching_versions(constraints)
-      all_versions
-        .select { |version| constraints.all? { |c| c.satisfies?(version) } }
+      repository
+        .versions
+        .select do |version|
+          constraints.all? { |constraint| constraint.satisfies?(version) }
+        end
     end
 
     # Returns the url for the repository
     Contract None => String
     def url
-      case @uri
-      when Uri::Github
-        "https://github.com/#{@uri.name}"
-      else
-        @uri.uri.to_s
-      end
+      @uri.to_s
     end
 
     # Returns the temporary path for the repository
@@ -111,27 +95,21 @@ module ElmInstall
     end
 
     # Returns the local repository
-    Contract None => Git::Base
+    Contract None => Repository
     def repository
-      return clone unless Dir.exist?(path)
-      repo = Git.open path
-      repo.reset_hard
-      repo
+      @repository ||= Repository.new url, path
     end
 
-    Contract None => nil
-    def reset
-      Logger.arrow "Getting updates for: #{url.bold}..."
-      repository.fetch
-      nil
-    end
-
-    # Clonse the repository
-    Contract None => Git::Base
-    def clone
-      Logger.arrow "Package: #{url.bold} not found in cache, cloning..."
-      FileUtils.mkdir_p path
-      Git.clone(url, path)
+    def to_log
+      case @uri
+      when Uri::Ssh, Uri::Http
+        case @branch
+        when Branch::Just
+          "#{url} at #{@branch.ref}"
+        else
+          url
+        end
+      end
     end
   end
 end

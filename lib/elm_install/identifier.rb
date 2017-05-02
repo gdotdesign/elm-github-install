@@ -32,20 +32,20 @@ module ElmInstall
 
       dependency_sources =
         raw['dependency-sources']
-          .to_h
-          .merge(@dependency_sources)
+        .to_h
+        .merge(@dependency_sources)
 
       dependencies.map do |package, constraint|
         constraints = Utils.transform_constraint constraint
 
         type =
-          if dependency_sources.key?(package) then
+          if dependency_sources.key?(package)
             source = dependency_sources[package]
             case source
             when Hash
               uri_type source['url'], Branch::Just(source['ref'])
             when String
-              if File.exists?(source)
+              if File.exist?(source)
                 Type::Directory(Pathname.new(source))
               else
                 uri_type source, Branch::Just('master')

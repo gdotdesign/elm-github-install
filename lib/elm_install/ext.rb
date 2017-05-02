@@ -1,4 +1,5 @@
 module Semverse
+  # Add utility functions
   class Version
     def to_simple
       "#{major}.#{minor}.#{patch}"

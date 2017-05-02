@@ -1,4 +1,5 @@
 module ElmInstall
+  # This clas handles sources that point to a local directory.
   class DirectorySource < Source
     attr_reader :dir
 
@@ -35,7 +36,11 @@ module ElmInstall
     # Returns the available versions for a repository
     Contract ArrayOf[Solve::Constraint] => ArrayOf[Semverse::Version]
     def versions(_)
-      [ identifier.version(fetch('')) ]
+      [identifier.version(fetch(''))]
+    end
+
+    def to_log
+      @dir.expand_path.to_s
     end
   end
 end

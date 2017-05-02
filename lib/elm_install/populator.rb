@@ -37,37 +37,21 @@ module ElmInstall
     def copy_dependencies
       @dependencies.each do |dependency|
         path =
-          File.join(
-            'elm-stuff',
-            'packages',
-            dependency.name,
-            dependency.version.to_simple
-          )
+          File.join('elm-stuff', 'packages', dependency.name,
+                    dependency.version.to_simple)
 
-        log = "#{dependency.name} - "
-
-        case dependency.source
-        when DirectorySource
-          log += "#{dependency.source.dir.expand_path} (#{dependency.version.to_simple})"
-        when GitSource
-          case dependency.source.uri
-          when Uri::Github
-            log += dependency.version.to_simple
-          else
-            log += dependency.source.url
-            case dependency.source.branch
-            when Branch::Just
-              log += " (#{dependency.source.branch.ref})"
-            else
-              log += " (#{dependency.version.to_simple})"
-            end
-          end
-        end
-
-        Logger.dot log
+        log_dependency dependency
 
         dependency.source.copy_to(dependency.version, Pathname.new(path))
       end
+    end
+
+    def log_dependency(dependency)
+      log = "#{dependency.name} - "
+      log += dependency.source.to_log.to_s
+      log += " (#{dependency.version.to_simple})"
+
+      Logger.dot log
     end
   end
 end
