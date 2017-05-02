@@ -26,7 +26,7 @@ module ElmInstall
 
       dependency
         .source
-        .versions
+        .versions(dependency.constraints)
         .each do |version|
           resolve_dependencies(dependency, version)
         end

@@ -48,7 +48,7 @@ module ElmInstall
 
         case dependency.source
         when DirectorySource
-          log += "#{dependency.source.dir.path} (#{dependency.version.to_simple})"
+          log += "#{dependency.source.dir.expand_path} (#{dependency.version.to_simple})"
         when GitSource
           case dependency.source.uri
           when Uri::Github

@@ -46,7 +46,7 @@ module ElmInstall
               uri_type source['url'], Branch::Just(source['ref'])
             when String
               if File.exists?(source)
-                Type::Directory(Dir.new(source))
+                Type::Directory(Pathname.new(source))
               else
                 uri_type source, Branch::Just('master')
               end

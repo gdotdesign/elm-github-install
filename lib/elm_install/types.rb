@@ -16,11 +16,10 @@ module ElmInstall
         @source ||= GitSource.new uri, branch
       end
     } |
-    Directory(path: Dir) {
+    Directory(path: Pathname) {
       def source
         @source ||= DirectorySource.new path
       end
-    } |
-    Registry(source: Class)
+    }
   end
 end

@@ -55,18 +55,31 @@ module ElmInstall
     end
 
     # Returns the available versions for a repository
-    Contract None => ArrayOf[Semverse::Version]
-    def versions
+    Contract ArrayOf[Solve::Constraint] => ArrayOf[Semverse::Version]
+    def versions(constraints)
       case @branch
       when Branch::Just
         [ identifier.version(fetch(@branch.ref)) ]
       when Branch::Nothing
-        repository
-          .tags
-          .map(&:name)
-          .map { |tag| Semverse::Version.try_new tag }
-          .compact
+        matches = matching_versions constraints
+        return matches if matches.any?
+        Logger.arrow "Could not find matching versions for: #{package_name.bold} in cache. Fetching updates."
+        repository.fetch
+        matching_versions constraints
       end
+    end
+
+    def all_versions
+      repository
+        .tags
+        .map(&:name)
+        .map { |tag| Semverse::Version.try_new tag }
+        .compact
+    end
+
+    def matching_versions(constraints)
+      all_versions
+        .select { |version| constraints.all? { |c| c.satisfies?(version) } }
     end
 
     # Returns the url for the repository
@@ -75,9 +88,7 @@ module ElmInstall
       case @uri
       when Uri::Github
         "https://github.com/#{@uri.name}"
-      when Uri::Ssh
-        @uri.uri.to_s
-      when Uri::Http
+      else
         @uri.uri.to_s
       end
     end
@@ -85,13 +96,17 @@ module ElmInstall
     # Returns the temporary path for the repository
     Contract None => String
     def path
+      File.join(options[:cache_directory], package_name)
+    end
+
+    # Returns the temporary path for the repository
+    Contract None => String
+    def package_name
       case @uri
       when Uri::Github
-        File.join(options[:cache_directory], @uri.name)
-      when Uri::Ssh
-        File.join(options[:cache_directory], @uri.uri.path.sub(%r{^/}, ''))
-      when Uri::Http
-        File.join(options[:cache_directory], @uri.uri.path.sub(%r{^/}, ''))
+        @uri.name
+      else
+        @uri.uri.path.sub(%r{^/}, '')
       end
     end
 
@@ -102,6 +117,13 @@ module ElmInstall
       repo = Git.open path
       repo.reset_hard
       repo
+    end
+
+    Contract None => nil
+    def reset
+      Logger.arrow "Getting updates for: #{url.bold}..."
+      repository.fetch
+      nil
     end
 
     # Clonse the repository
