@@ -2,7 +2,18 @@ describe ElmInstall::Installer do
   subject { described_class.new cache_directory: CACHE_DIRECTORY }
 
   let(:main_package) do
-    { dependencies: { 'base/core' => '1.0.0 <= v < 2.0.0' } }.to_json
+    {
+      dependencies:
+        {
+          'base/core' => '1.0.0 <= v < 2.0.0',
+          'base/uri' => '1.0.0 <= v < 2.0.0',
+          'base/ssh' => '1.0.0 <= v < 2.0.0'
+        },
+      'dependency-sources' => {
+        'base/uri' => 'https://github.com/base/uri',
+        'base/ssh' => 'git@github.com:base/ssh'
+      }
+    }.to_json
   end
 
   let(:base_package) do
@@ -17,23 +28,23 @@ describe ElmInstall::Installer do
         .and_return(main_package)
         .twice
 
-      expect(File)
+      allow(File)
         .to receive(:read)
         .with(File.join(Dir.new(CACHE_DIRECTORY), 'elm-package.json'))
         .and_return(base_package)
 
-      expect_any_instance_of(ElmInstall::GitSource)
+      allow_any_instance_of(ElmInstall::GitSource)
         .to receive(:versions)
         .and_return([Semverse::Version.new('1.0.0')])
 
-      expect_any_instance_of(ElmInstall::GitSource)
+      allow_any_instance_of(ElmInstall::GitSource)
         .to receive(:fetch)
         .with(Semverse::Version.new('1.0.0'))
-        .twice
         .and_return Dir.new(CACHE_DIRECTORY)
 
       expect(ElmInstall::Logger)
         .to receive(:dot)
+        .exactly(3).times
 
       expect(subject)
         .to receive(:puts)

@@ -34,7 +34,8 @@ describe ElmInstall::Repository do
         .to receive(:reset_hard)
 
       expect_any_instance_of(Git::Base)
-        .to receive(:tags).and_return [double(name: '1.0.0')]
+        .to receive(:tags)
+        .and_return [double(name: 'test'), double(name: '1.0.0')]
 
       expect(subject.versions)
         .to eq([Semverse::Version.new('1.0.0')])

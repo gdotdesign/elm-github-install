@@ -162,6 +162,8 @@ module ElmInstall
         else
           url
         end
+      else
+        url
       end
     end
   end
