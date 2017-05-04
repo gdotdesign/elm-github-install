@@ -15,8 +15,11 @@ command :install do |c|
            'Specifies where the cache is stored'
   c.option '--verbose'
   c.action do |_args, options|
-    ElmInstall.install verbose: options.verbose,
-                       cache_directory: options.cache_directory
+    ElmInstall.install(
+      verbose: options.verbose,
+      cache_directory: options.cache_directory ||
+                       File.join(Dir.home, '.elm-install')
+    )
   end
 end
 

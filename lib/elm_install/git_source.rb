@@ -80,7 +80,17 @@ module ElmInstall
     # Returns the temporary path for the repository
     Contract None => String
     def path
-      File.join(options[:cache_directory], package_name)
+      File.join(options[:cache_directory], host, package_name)
+    end
+
+    Contract None => String
+    def host
+      case @uri
+      when Uri::Github
+        'github.com'
+      else
+        @uri.uri.host
+      end
     end
 
     # Returns the temporary path for the repository
