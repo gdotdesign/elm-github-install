@@ -1,8 +1,8 @@
 module ElmInstall
   # Installer class
   class Installer < Base
-    Contract KeywordArgs[cache_directory: Or[String,NilClass],
-                         verbose: Or[Bool,NilClass]] => Installer
+    Contract KeywordArgs[cache_directory: Or[String, NilClass],
+                         verbose: Or[Bool, NilClass]] => Installer
     # Initializes an installer with the given options
     #
     # @param options [Hash] The options

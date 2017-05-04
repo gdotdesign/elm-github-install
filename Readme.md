@@ -58,7 +58,6 @@ Resolving packages...
   ▶ Package: https://github.com/elm-lang/virtual-dom not found in cache, cloning...
   ▶ Package: https://github.com/elm-lang/dom not found in cache, cloning...
 Solving dependencies...
-Saving package cache...
   ● elm-lang/core - 5.0.0 (5.0.0)
   ● elm-lang/svg - 2.0.0 (2.0.0)
   ● elm-lang/dom - 1.1.1 (1.1.1)
@@ -68,16 +67,25 @@ Packages configured successfully!
 ```
 
 ## Advanced Usage
-Sources (urls for git repositories) can be defined in the `dependency-sources`
-field in `elm-package.json` for any package defined in the `dependencies`
-field. There is only one restriction: the pacakges name must match the path of
-the url of the git repository, this is because it could cause conflicts with
-other packages and with native code.
+Sources can be defined in the `dependency-sources` field in `elm-package.json`
+for any package defined in the `dependencies` field.
 
-The source can be defined by a string (url) or a hash containing the url and the
-reference (tag, commit hash, branch) to use. If a reference is defined then
-the version in the `dependencies` field is ignored and the **version will be
-used from the `elm-package.json` at that reference**.
+The source can be defined as:
+* a string (URL): `"elm-lang/core": "git@github.com:someuser/core"`
+* a hash containing the url and the reference (tag, commit hash, branch) to use:
+  ```
+    "gdotdesign/elm-install-test": {
+      "url": "gdotdesign@bitbucket.org:gdotdesign/elm-install-test",
+      "ref": "master"
+    }
+  ```
+* an absolute or relative path to the package:
+  ```
+    "elm-lang/dom": "../elm-lang/dom"
+  ```
+
+If a reference or a path is defined then the version in the `dependencies` field is
+ignored and the **version will be used from the `elm-package.json` at that source**.
 
 ```
   ...
@@ -88,7 +96,8 @@ used from the `elm-package.json` at that reference**.
     "elm-lang/dom": "1.1.1 <= v < 2.0.0"
   },
   "dependency-sources": {
-    "elm-lang/core": "git@github.com:elm-lang/core",
+    "elm-lang/core": "git@github.com:someuser/core",
+    "elm-lang/dom": "../elm-lang/dom",
     "gdotdesign/elm-install-test": {
       "url": "gdotdesign@bitbucket.org:gdotdesign/elm-install-test",
       "ref": "master"

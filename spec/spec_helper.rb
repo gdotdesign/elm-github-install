@@ -1,6 +1,6 @@
 require 'simplecov'
 
-CACHE_DIRECTORY = 'spec/fixtures/cache'.freeze
+CACHE_DIRECTORY = 'spec/cache'.freeze
 
 RSpec.configure do |config|
   config.before do

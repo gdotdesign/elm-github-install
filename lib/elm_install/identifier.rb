@@ -1,7 +1,10 @@
 module ElmInstall
   # Identifies dependencies
   class Identifier < Base
+    # @return [Array<Dependency>] The initial dependencies
     attr_reader :initial_dependencies
+
+    # @return [Hash] The options
     attr_reader :options
 
     Contract Dir, Hash => Identifier

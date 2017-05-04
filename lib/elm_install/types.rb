@@ -1,9 +1,11 @@
 module ElmInstall
+  # Represents a branch
   Branch = ADT do
     Just(ref: String) |
       Nothing()
   end
 
+  # Represents an uri
   Uri = ADT do
     Ssh(uri: URI::SshGit::Generic) do
       def to_s
@@ -24,6 +26,7 @@ module ElmInstall
       end
   end
 
+  # Represents a source type
   Type = ADT do
     Git(uri: Uri, branch: Branch) do
       def source

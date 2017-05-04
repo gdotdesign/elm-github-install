@@ -3,20 +3,20 @@ module ElmInstall
   class Dependency < Base
     extend Forwardable
 
-    # @!attribute [r] constraints
-    #   The constraints for the dependency
+    # @return [Array] The constraints for the dependency
     attr_reader :constraints
 
-    # @!attribute [rw] version
-    #   The resolved version for the dependency
+    # @overload version
+    #   @return [Semverse::Version] The version
+    # @overload version=(value)
+    #   Sets the version
+    #   @param [Semverse::Version] The version
     attr_accessor :version
 
-    # @!attribute [r] source
-    #   The source to use when resolving the dependency (Git, Directory)
+    # @return [Source] The source to use for resolving (Git, Directory)
     attr_reader :source
 
-    # @!attribute [r] name
-    #   The name of the dependency
+    # @return [String] The name of the dependency
     attr_reader :name
 
     Contract String, Source, ArrayOf[Solve::Constraint] => Dependency
@@ -24,7 +24,7 @@ module ElmInstall
     #
     # @param name [String] The name
     # @param source [Source] The source
-    # @param constraints [Array] The contraints
+    # @param constraints [Array<Solve::Constraint>] The contraints
     #
     # @return [Dependency] The dependency instance
     def initialize(name, source, constraints)
