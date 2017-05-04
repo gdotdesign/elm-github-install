@@ -1,11 +1,23 @@
 module ElmInstall
   # Installer class
   class Installer < Base
+    Contract KeywordArgs[cache_directory: Optional[String],
+                         verbose: Optional[Bool]] => Installer
+    # Initializes an installer with the given options
+    #
+    # @param options [Hash] The options
+    #
+    # @return [Installer] The installer instance
     def initialize(options = {})
       @identifier = Identifier.new Dir.new(Dir.pwd), options
       @resolver = Resolver.new @identifier
+      self
     end
 
+    Contract None => NilClass
+    # Installs packages
+    #
+    # @return nil
     def install
       puts 'Resolving packages...'
       @graph = @resolver.resolve
@@ -14,8 +26,15 @@ module ElmInstall
       (Populator.new results).populate
 
       puts 'Packages configured successfully!'
+      nil
+    rescue Solve::Errors::NoSolutionError => error
+      Logger.arrow "No solution found: #{error}"
     end
 
+    Contract None => ArrayOf[Dependency]
+    # Returns the results of solving
+    #
+    # @return [Array] Array of dependencies
     def results
       Solve
         .it!(@graph, initial_solve_constraints)
@@ -26,6 +45,10 @@ module ElmInstall
         end
     end
 
+    Contract None => Array
+    # Returns the inital constraints
+    #
+    # @return [Array] Array of dependency names and constraints
     def initial_solve_constraints
       @identifier.initial_dependencies.flat_map do |dependency|
         dependency.constraints.map do |constraint|

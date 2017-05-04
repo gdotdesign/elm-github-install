@@ -4,6 +4,8 @@ CACHE_DIRECTORY = 'spec/fixtures/cache'.freeze
 
 RSpec.configure do |config|
   config.before do
+    allow(Process).to receive(:exit)
+    allow(ElmInstall::Logger).to receive(:puts)
     FileUtils.mkdir_p CACHE_DIRECTORY
   end
 

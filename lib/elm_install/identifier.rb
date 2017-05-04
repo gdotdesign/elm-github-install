@@ -78,8 +78,10 @@ module ElmInstall
       JSON.parse(File.read(path))
     rescue JSON::ParserError
       exit "Invalid JSON in file: #{path.bold}", options
+      {}
     rescue Errno::ENOENT
       exit "Could not find file: #{path.bold}", options
+      {}
     end
 
     def exit(message, options)
