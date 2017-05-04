@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    elm_install (1.0.0.rc)
+    elm_install (1.0.0.pre.rc)
       adts (~> 0.1.2)
       commander (~> 4.4, >= 4.4.2)
       contracts (~> 0.16.0)
@@ -51,7 +51,7 @@ GEM
     git (1.3.0)
     git_clone_url (2.0.0)
       uri-ssh_git (>= 2.0)
-    hashdiff (0.3.2)
+    hashdiff (0.3.4)
     highline (1.7.8)
     ice_nine (0.11.2)
     inch (0.7.1)
