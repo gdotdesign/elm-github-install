@@ -1,18 +1,31 @@
 module ElmInstall
   # Git Source
   class GitSource < Source
-    attr_reader :uri, :branch
+    # @return [Uri] The uri
+    attr_reader :uri
 
-    # Initializes a git source by URI and branch
+    # @return [Branch] The branch
+    attr_reader :branch
+
     Contract Uri, Branch => GitSource
+    # Initializes a git source by URI and branch
+    #
+    # @param uri [Uri] The uri
+    # @param branch [Branch] The branch
+    #
+    # @return [GitSource]
     def initialize(uri, branch)
       @branch = branch
       @uri = uri
       self
     end
 
-    # Downloads the version into a temporary directory
     Contract Or[String, Semverse::Version] => Dir
+    # Downloads the version into a temporary directory
+    #
+    # @param version [Semverse::Version] The version to fetch
+    #
+    # @return [Dir] The directory for the source of the version
     def fetch(version)
       # Get the reference from the branch
       ref =
@@ -26,8 +39,13 @@ module ElmInstall
       repository.checkout ref
     end
 
-    # Copies the version into the given directory
     Contract Semverse::Version, Pathname => nil
+    # Copies the version into the given directory
+    #
+    # @param version [Semverse::Version] The version
+    # @param directory [Pathname] The pathname
+    #
+    # @return nil
     def copy_to(version, directory)
       # Delete the directory to make sure no pervious version remains if
       # we are using a branch or symlink if using Dir.
@@ -45,8 +63,12 @@ module ElmInstall
       nil
     end
 
-    # Returns the available versions for a repository
     Contract ArrayOf[Solve::Constraint] => ArrayOf[Semverse::Version]
+    # Returns the available versions for a repository
+    #
+    # @param constraints [Array] The constraints
+    #
+    # @return [Array] The versions
     def versions(constraints)
       case @branch
       when Branch::Just
@@ -63,6 +85,12 @@ module ElmInstall
       end
     end
 
+    Contract ArrayOf[Solve::Constraint] => ArrayOf[Semverse::Version]
+    # Returns the matchign versions for a repository for the given constraints
+    #
+    # @param constraints [Array] The constraints
+    #
+    # @return [Array] The versions
     def matching_versions(constraints)
       repository
         .versions
@@ -71,19 +99,26 @@ module ElmInstall
         end
     end
 
-    # Returns the url for the repository
     Contract None => String
+    # Returns the url for the repository
+    #
+    # @return [String] The url
     def url
       @uri.to_s
     end
 
-    # Returns the temporary path for the repository
     Contract None => String
+    # Returns the temporary path for the repository
+    #
+    # @return [String] The path
     def path
       File.join(options[:cache_directory], host, package_name)
     end
 
     Contract None => String
+    # Returns the host for the repository
+    #
+    # @return [String] The host
     def host
       case @uri
       when Uri::Github
@@ -93,8 +128,10 @@ module ElmInstall
       end
     end
 
-    # Returns the temporary path for the repository
     Contract None => String
+    # Returns the package name for the repository
+    #
+    # @return [String] The name
     def package_name
       case @uri
       when Uri::Github
@@ -104,12 +141,18 @@ module ElmInstall
       end
     end
 
-    # Returns the local repository
     Contract None => Repository
+    # Returns the local repository
+    #
+    # @return [Repository] The repository
     def repository
       @repository ||= Repository.new url, path
     end
 
+    Contract None => Or[String, NilClass]
+    # Returns the log format
+    #
+    # @return [String]
     def to_log
       case @uri
       when Uri::Ssh, Uri::Http

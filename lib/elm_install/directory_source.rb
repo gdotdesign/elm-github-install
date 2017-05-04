@@ -1,6 +1,7 @@
 module ElmInstall
   # This clas handles sources that point to a local directory.
   class DirectorySource < Source
+    # @return [Dir] The directory
     attr_reader :dir
 
     Contract Pathname => DirectorySource

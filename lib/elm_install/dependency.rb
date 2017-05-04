@@ -20,11 +20,11 @@ module ElmInstall
     attr_reader :name
 
     Contract String, Source, ArrayOf[Solve::Constraint] => Dependency
-    # Initializes a new dependency
+    # Initializes a new dependency.
     #
-    # @param name [String] The name
-    # @param source [Source] The source
     # @param constraints [Array<Solve::Constraint>] The contraints
+    # @param source [Source] The source
+    # @param name [String] The name
     #
     # @return [Dependency] The dependency instance
     def initialize(name, source, constraints)
