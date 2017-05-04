@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    elm_install (1.0.0)
+    elm_install (1.0.0.rc)
       adts (~> 0.1.2)
       commander (~> 4.4, >= 4.4.2)
       contracts (~> 0.16.0)
