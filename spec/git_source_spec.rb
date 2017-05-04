@@ -40,7 +40,6 @@ describe ElmInstall::GitSource do
         .and_return(repository)
     end
 
-
     context 'Github' do
       let(:uri) do
         ElmInstall::Uri::Github('test/repo')
@@ -87,7 +86,7 @@ describe ElmInstall::GitSource do
             it 'returns the versions' do
               expect(subject)
                 .to receive(:identifier)
-                .and_return(double(version: Semverse::Version.new('1.0.0') ))
+                .and_return(double(version: Semverse::Version.new('1.0.0')))
 
               expect(repository)
                 .to receive(:checkout)
