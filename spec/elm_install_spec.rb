@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 describe ElmInstall do
   it 'should install packages' do
     expect(ElmInstall::Logger)

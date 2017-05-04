@@ -1,13 +1,11 @@
-require 'spec_helper'
-
 describe ElmInstall::Utils do
   subject { described_class }
 
   let(:package_variations) do
     [
-      'git@github.com:test/repo',
       'https://github.com/test/repo',
-      'git://github.com/test/repo'
+      'git://github.com/test/repo',
+      'git@github.com:test/repo'
     ]
   end
 

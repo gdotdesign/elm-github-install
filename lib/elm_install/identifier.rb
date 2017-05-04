@@ -4,8 +4,13 @@ module ElmInstall
     attr_reader :initial_dependencies
     attr_reader :options
 
-    # Initialize a new identifier.
     Contract Dir, Hash => Identifier
+    # Initialize a new identifier.
+    #
+    # @param directory [Dir] The initial directory
+    # @param options [Hash] The options
+    #
+    # @return [Indentifier] The identifier instance
     def initialize(directory, options = {})
       @options = options
       @dependency_sources = dependency_sources directory
@@ -14,17 +19,31 @@ module ElmInstall
     end
 
     Contract Dir => HashOf[String => Any]
+    # Returns the dependency sources for the given directory.
+    #
+    # @param directory [Dir] The directory
+    #
+    # @return [Hash] The directory sources
     def dependency_sources(directory)
       json(directory)['dependency-sources'].to_h
     end
 
     Contract Dir => Semverse::Version
+    # Returns the version of a package in the given directory.
+    #
+    # @param directory [Dir] The directory
+    #
+    # @return [Semverse::Version] The version
     def version(directory)
       Semverse::Version.new(json(directory)['version'])
     end
 
-    # Identifies dependencies from a directory
     Contract Dir => ArrayOf[Dependency]
+    # Identifies dependencies from a directory
+    #
+    # @param directory [Dir] The directory
+    #
+    # @return [Array] The dependencies
     def identify(directory)
       raw = json(directory)
 
@@ -62,6 +81,13 @@ module ElmInstall
       end
     end
 
+    Contract String, Branch => Type
+    # Returns the type from the given arguments.
+    #
+    # @param url [String] The base url
+    # @param branch [Branch] The branch
+    #
+    # @return [Type] The type
     def uri_type(url, branch)
       uri = GitCloneUrl.parse(url)
       case uri
@@ -73,21 +99,32 @@ module ElmInstall
     end
 
     Contract Dir => HashOf[String => Any]
+    # Returns the contents of the 'elm-package.json' for the given directory.
+    #
+    # @param directory [Dir] The directory
+    #
+    # @return [Hash] The contents
     def json(directory)
       path = File.join(directory, 'elm-package.json')
       JSON.parse(File.read(path))
     rescue JSON::ParserError
-      exit "Invalid JSON in file: #{path.bold}", options
+      exit "Invalid JSON in file: #{path.bold}"
       {}
     rescue Errno::ENOENT
-      exit "Could not find file: #{path.bold}", options
+      exit "Could not find file: #{path.bold}"
       {}
     end
 
-    def exit(message, options)
-      return {} if options[:silent]
+    Contract String => NilClass
+    # Exits the current process and logs a given message.
+    #
+    # @param message [String] The message
+    #
+    # @return nil
+    def exit(message)
       Logger.arrow message
       Process.exit
+      nil
     end
   end
 end

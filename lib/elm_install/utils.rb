@@ -15,6 +15,11 @@ module ElmInstall
     }.freeze
 
     Contract String => [Solve::Constraint]
+    # Transform an 'elm' constraint into a proper one.
+    #
+    # @param elm_constraint [String] The elm constraint
+    #
+    # @return [Array] The transform constraints
     def transform_constraint(elm_constraint)
       elm_constraint.gsub!(/\s/, '')
 
