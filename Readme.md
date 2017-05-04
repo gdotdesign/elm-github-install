@@ -58,11 +58,11 @@ Resolving packages...
   ▶ Package: https://github.com/elm-lang/virtual-dom not found in cache, cloning...
   ▶ Package: https://github.com/elm-lang/dom not found in cache, cloning...
 Solving dependencies...
-  ● elm-lang/core - 5.0.0 (5.0.0)
-  ● elm-lang/svg - 2.0.0 (2.0.0)
-  ● elm-lang/dom - 1.1.1 (1.1.1)
-  ● elm-lang/html - 2.0.0 (2.0.0)
-  ● elm-lang/virtual-dom - 2.0.3 (2.0.3)
+  ● elm-lang/core - https://github.com/elm-lang/core (5.1.1)
+  ● elm-lang/svg - https://github.com/elm-lang/svg (2.0.0)
+  ● elm-lang/dom - https://github.com/elm-lang/dom (1.1.1)
+  ● elm-lang/html - https://github.com/elm-lang/html (2.0.0)
+  ● elm-lang/virtual-dom - https://github.com/elm-lang/virtual-dom (2.0.4)
 Packages configured successfully!
 ```
 
@@ -71,7 +71,8 @@ Sources can be defined in the `dependency-sources` field in `elm-package.json`
 for any package defined in the `dependencies` field.
 
 The source can be defined as:
-* a string (URL): `"elm-lang/core": "git@github.com:someuser/core"`
+* a string (URL) pointing to a Git repository:
+  `"elm-lang/core": "git@github.com:someuser/core"`
 * a hash containing the url and the reference (tag, commit hash, branch) to use:
   ```
     "gdotdesign/elm-install-test": {
@@ -79,7 +80,7 @@ The source can be defined as:
       "ref": "master"
     }
   ```
-* an absolute or relative path to the package:
+* an absolute or relative path to the package in your hard drive:
   ```
     "elm-lang/dom": "../elm-lang/dom"
   ```
@@ -87,6 +88,7 @@ The source can be defined as:
 If a reference or a path is defined then the version in the `dependencies` field is
 ignored and the **version will be used from the `elm-package.json` at that source**.
 
+Examples:
 ```
   ...
   "dependencies": {
@@ -124,6 +126,3 @@ The following protocols can be used:
 #### Can I install from private repositories?
 Yes private repositories are supported provided you have authentication
 (for example SSH keys).
-
-## How is it work exactly?
-You can read more about it [here](docs/How it works.md).
