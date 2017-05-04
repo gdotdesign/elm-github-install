@@ -7,10 +7,12 @@
 [![Inline docs](http://inch-ci.org/github/gdotdesign/elm-github-install.svg?branch=master)](http://inch-ci.org/github/gdotdesign/elm-github-install)
 [![Build Status](https://travis-ci.org/gdotdesign/elm-github-install.svg?branch=master)](https://travis-ci.org/gdotdesign/elm-github-install)
 
-This gem allows you to install Elm packages **directly from any Git repository
-(even private ones)**, bypassing the package repository (package.elm-lang.org)
-while also enabling restricted (effect manager and native) packages to be
-installed.
+This gem/npm-package allows you to install Elm packages **in a decentralized way from Git repositories**, this allows:
+* installing of **effect manager** and **native** packages
+* installing **forks of packages** for testing or unreleased features
+* using packages from **local directories**
+* installing **private packages** using private git repositories
+* installing packages **offline** (packages are cached)
 
 ## Installation
 
@@ -58,27 +60,39 @@ Resolving packages...
   ▶ Package: https://github.com/elm-lang/virtual-dom not found in cache, cloning...
   ▶ Package: https://github.com/elm-lang/dom not found in cache, cloning...
 Solving dependencies...
-Saving package cache...
-  ● elm-lang/core - 5.0.0 (5.0.0)
-  ● elm-lang/svg - 2.0.0 (2.0.0)
-  ● elm-lang/dom - 1.1.1 (1.1.1)
-  ● elm-lang/html - 2.0.0 (2.0.0)
-  ● elm-lang/virtual-dom - 2.0.3 (2.0.3)
+  ● elm-lang/core - https://github.com/elm-lang/core (5.1.1)
+  ● elm-lang/svg - https://github.com/elm-lang/svg (2.0.0)
+  ● elm-lang/dom - https://github.com/elm-lang/dom (1.1.1)
+  ● elm-lang/html - https://github.com/elm-lang/html (2.0.0)
+  ● elm-lang/virtual-dom - https://github.com/elm-lang/virtual-dom (2.0.4)
 Packages configured successfully!
 ```
 
 ## Advanced Usage
-Sources (urls for git repositories) can be defined in the `dependency-sources`
-field in `elm-package.json` for any package defined in the `dependencies`
-field. There is only one restriction: the pacakges name must match the path of
-the url of the git repository, this is because it could cause conflicts with
-other packages and with native code.
+Sources can be defined in the `dependency-sources` field in `elm-package.json`
+for any package defined in the `dependencies` field.
 
-The source can be defined by a string (url) or a hash containing the url and the
-reference (tag, commit hash, branch) to use. If a reference is defined then
-the version in the `dependencies` field is ignored and the **version will be
-used from the `elm-package.json` at that reference**.
+The source can be defined as:
+* an URL pointing to a Git repository:
+  ```
+  "elm-lang/core": "git@github.com:someuser/core"
+  ```
+* a hash containing the URL and the reference (tag, commit hash, branch) to use:
+  ```
+  "gdotdesign/elm-install-test": {
+    "url": "gdotdesign@bitbucket.org:gdotdesign/elm-install-test",
+    "ref": "master"
+  }
+  ```
+* an absolute or relative path to the package in your hard drive:
+  ```
+  "elm-lang/dom": "../elm-lang/dom"
+  ```
 
+If a reference or a path is defined then the version in the `dependencies` field is
+ignored and the **version will be used from the `elm-package.json` at that source**.
+
+Examples:
 ```
   ...
   "dependencies": {
@@ -88,13 +102,64 @@ used from the `elm-package.json` at that reference**.
     "elm-lang/dom": "1.1.1 <= v < 2.0.0"
   },
   "dependency-sources": {
-    "elm-lang/core": "git@github.com:elm-lang/core",
+    "elm-lang/core": "git@github.com:someuser/core",
+    "elm-lang/dom": "../elm-lang/dom",
     "gdotdesign/elm-install-test": {
       "url": "gdotdesign@bitbucket.org:gdotdesign/elm-install-test",
       "ref": "master"
     }
   }
   ...
+```
+
+### CLI
+Help for the `elm-install` command:
+```
+NAME:
+
+  elm-install
+
+DESCRIPTION:
+
+  Install Elm packages from Git repositories.
+
+COMMANDS:
+
+  help    Display global or [command] help documentation
+  install Install Elm packages from the elm-package.json file.
+
+GLOBAL OPTIONS:
+
+  -h, --help
+      Display help documentation
+
+  -v, --version
+      Display version information
+
+  -t, --trace
+      Display backtrace when an error occurs
+```
+
+Help for the `elm-install install` command.
+```
+NAME:
+
+  install
+
+SYNOPSIS:
+
+  elm-install install
+
+DESCRIPTION:
+
+  Install Elm packages from the elm-package.json file.
+
+OPTIONS:
+
+  --cache-directory STRING
+      Specifies where the cache is stored
+
+  --verbose
 ```
 
 ## FAQ
@@ -115,6 +180,3 @@ The following protocols can be used:
 #### Can I install from private repositories?
 Yes private repositories are supported provided you have authentication
 (for example SSH keys).
-
-## How is it work exactly?
-You can read more about it [here](docs/How it works.md).

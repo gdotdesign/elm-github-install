@@ -1,100 +1,79 @@
 module ElmInstall
-  # This class is responsible for populating the `elm-stuff` directory.
-  class Populator
-    # Initializes a new populator.
+  # Populator for 'elm-stuff' directory
+  class Populator < Base
+    Contract ArrayOf[Dependency] => Populator
+    # Initializes a new populator
     #
-    # @param git_resolver [GitResolver] The git resolver to use.
-    def initialize(git_resolver)
-      @git_resolver = git_resolver
+    # @param dependencies [Array] The dependencies to populate
+    #
+    # @return Populator The populator instance
+    def initialize(dependencies)
+      @dependencies = dependencies
+      self
     end
 
-    # Populates `elm-stuff` from the given solution.
+    Contract None => NilClass
+    # Populates 'elm-stuff' directory and writes
+    # 'elm-stuff/exact-dependencies.json'.
     #
-    # @param solution [Hash] The solution.
-    #
-    # @return [void]
-    def populate(solution)
-      solution.each do |package, version|
-        resolve_package package, version
-      end
-
-      write_exact_dependencies(solution)
+    # @return nil
+    def populate
+      copy_dependencies
+      write_exact_dependencies
     end
 
-    # Resolves and copies a package and it's version to `elm-stuff/packages`
-    # directory.
+    Contract None => NilClass
+    # Writes the 'elm-stuff/exact-dependencies.json'
     #
-    # :reek:TooManyStatements { max_statements: 9 }
-    #
-    # @param package [String] The package
-    # @param version_str [String] The resolved version
-    #
-    # @return [void]
-    def resolve_package(package, version_str)
-      version, ref = self.class.version_and_ref(version_str)
-
-      package_name, package_path = Utils.package_version_path package, version
-
-      @git_resolver.repository(package).checkout(ref)
-
-      Logger.dot "#{package_name.bold} - #{version.bold} (#{ref})"
-
-      FileUtils.rm_rf(package_path) if Dir.exist?(package_path)
-
-      copy_package package, package_path
-    end
-
-    # Copies the given package from it's repository to the given path.
-    #
-    # @param package [String] The package to copy
-    # @param package_path [String] The destination
-    #
-    # @return [void]
-    def copy_package(package, package_path)
-      repository_path = File.join(@git_resolver.repository_path(package), '.')
-
-      FileUtils.mkdir_p(package_path)
-      FileUtils.cp_r(repository_path, package_path)
-      FileUtils.rm_rf(File.join(package_path, '.git'))
-    end
-
-    # Writes the `elm-stuff/exact-dependencies.json` file.
-    #
-    # @param solution [Hash] The solution
-    #
-    # @return [void]
-    def write_exact_dependencies(solution)
+    # @return nil
+    def write_exact_dependencies
       File.binwrite(
         File.join('elm-stuff', 'exact-dependencies.json'),
-        JSON.pretty_generate(self.class.exact_dependencies(solution))
+        JSON.pretty_generate(exact_dependencies)
       )
+      nil
     end
 
-    # Returns the exact dependencies from the solution.
+    Contract None => HashOf[String => String]
+    # Returns the contents for 'elm-stuff/exact-dependencies.json'
     #
-    # @param solution [Hash] The solution
-    #
-    # @return [void]
-    def self.exact_dependencies(solution)
-      solution.each_with_object({}) do |(key, value), memo|
-        version, = version_and_ref value
-
-        memo[GitCloneUrl.parse(key).path.sub(%r{^/}, '')] = version
+    # @return [Hash] The dependencies
+    def exact_dependencies
+      @dependencies.each_with_object({}) do |dependency, memo|
+        memo[dependency.name] = dependency.version.to_simple
       end
     end
 
-    # Retruns the version and the ref from the given string.
+    Contract None => NilClass
+    # Copies dependencies to 'elm-stuff/packages/package/version' directory
     #
-    # @param value [String] The input
+    # @return nil
+    def copy_dependencies
+      @dependencies.each do |dependency|
+        path =
+          File.join('elm-stuff', 'packages', dependency.name,
+                    dependency.version.to_simple)
+
+        log_dependency dependency
+
+        dependency.source.copy_to(dependency.version, Pathname.new(path))
+      end
+      nil
+    end
+
+    Contract Dependency => NilClass
+    # Logs the dependency with a dot
     #
-    # @return [Array] The version and the ref as an array
-    def self.version_and_ref(value)
-      match = value.match(/(.+)\+(.+)/)
+    # @param dependency [Dependency] The dependency
+    #
+    # @return nil
+    def log_dependency(dependency)
+      log = "#{dependency.name} - "
+      log += dependency.source.to_log.to_s
+      log += " (#{dependency.version.to_simple})"
 
-      version = match ? match[1] : value
-      ref = match ? match[2] : value
-
-      [version, ref]
+      Logger.dot log
+      nil
     end
   end
 end

@@ -26,13 +26,13 @@ var executablePath = function(suffix) {
   )
 }
 
-if(platform == 'linux' && arch == 'x64') {
+if(platform === 'linux' && arch === 'x64') {
   execute('linux-x86_64')
-} else if (platform == 'linux') {
+} else if (platform === 'linux') {
   execute('linux-x86')
-} else if (platform == 'darwin') {
+} else if (platform === 'darwin') {
   execute('osx')
-} else if (platform == 'win32') {
+} else if (platform === 'win32') {
   exec(executablePath('win32') + '.bat', [ process.argv.slice(2) ], { stdio: 'inherit' })
 } else {
   console.log('Your operating system is not supported.')

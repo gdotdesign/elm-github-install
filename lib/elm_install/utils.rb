@@ -1,6 +1,9 @@
 module ElmInstall
   # This module contains utility functions.
   module Utils
+    include Contracts::Core
+    include Contracts::Builtin
+
     module_function
 
     # Regexes for converting constraints.
@@ -11,29 +14,20 @@ module ElmInstall
       /(.*)<v/ => '>'
     }.freeze
 
-    # Transform constraints form Elm's package format to semver's.
+    Contract String => [Solve::Constraint]
+    # Transform an 'elm' constraint into a proper one.
     #
-    # @param constraint [String] The input constraint
+    # @param elm_constraint [String] The elm constraint
     #
-    # @return [Array] The output constraints
-    def transform_constraint(constraint)
-      constraint.gsub!(/\s/, '')
+    # @return [Array] The transform constraints
+    def transform_constraint(elm_constraint)
+      elm_constraint.gsub!(/\s/, '')
 
-      CONVERTERS.map do |regexp, prefix|
-        match = constraint.match(regexp)
-        "#{prefix} #{match[1]}" if match
-      end.compact
-    end
-
-    # Returns the path for a package with the given version.
-    #
-    # @param package [String] The package
-    # @param version [String] The version
-    #
-    # @return [Strin] The path
-    def package_version_path(package, version)
-      package_name = GitCloneUrl.parse(package).path.sub(%r{^/}, '')
-      [package_name, File.join('elm-stuff', 'packages', package_name, version)]
+      CONVERTERS
+        .map { |regexp, prefix| [elm_constraint.match(regexp), prefix] }
+        .select { |(match)| match }
+        .map { |(match, prefix)| "#{prefix} #{match[1]}" }
+        .map { |constraint| Solve::Constraint.new constraint }
     end
   end
 end

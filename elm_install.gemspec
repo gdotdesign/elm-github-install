@@ -25,6 +25,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'smart_colored', '~> 1.1', '>= 1.1.1'
   s.add_dependency 'hashdiff', '~> 0.3.1'
   s.add_dependency 'indentation', '~> 0.1.1'
+  s.add_dependency 'contracts', '~> 0.16.0'
+  s.add_dependency 'adts', '~> 0.1.2'
 
   s.extra_rdoc_files = ['Readme.md']
 end

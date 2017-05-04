@@ -1,118 +1,60 @@
-require_relative './resolver'
-require_relative './elm_package'
-require_relative './git_resolver'
-require_relative './graph_builder'
-require_relative './populator'
-
 module ElmInstall
-  # This class is responsible getting a solution for the `elm-package.json`
-  # file and populating the `elm-stuff` directory with the packages and
-  # writing the `elm-stuff/exact-dependencies.json`.
-  class Installer
-    # Initializes a new installer with the given options.
-    #
-    # @param options [Hash] The options
-    def initialize(options)
-      init_options options
-      @git_resolver = GitResolver.new directory: cache_directory
-      @cache = Cache.new directory: cache_directory
-      @populator = Populator.new @git_resolver
-      @options = options
-    end
-
-    # Initializes the options setting default values.
+  # Installer class
+  class Installer < Base
+    Contract KeywordArgs[cache_directory: Or[String, NilClass],
+                         verbose: Or[Bool, NilClass]] => Installer
+    # Initializes an installer with the given options
     #
     # @param options [Hash] The options
     #
-    # @return [Hash] The options
-    def init_options(options = { verbose: false })
-      options[:cache_directory] ||= File.join(Dir.home, '.elm-install')
-      @options = options
+    # @return [Installer] The installer instance
+    def initialize(options = {})
+      @identifier = Identifier.new Dir.new(Dir.pwd), options
+      @resolver = Resolver.new @identifier
+      self
     end
 
-    # Returns the path to the cache directory
+    Contract None => NilClass
+    # Installs packages
     #
-    # @return [String] The path
-    def cache_directory
-      @options[:cache_directory]
-    end
-
-    # Executes the installation
-    #
-    # :reek:TooManyStatements { max_statements: 7 }
-    #
-    # @return [void]
+    # @return nil
     def install
       puts 'Resolving packages...'
-      resolver.add_constraints dependencies
+      @graph = @resolver.resolve
 
       puts 'Solving dependencies...'
-      populate_elm_stuff
-    rescue
-      retry_install
-    end
+      (Populator.new results).populate
 
-    # Saves the caches
-    #
-    # @return [void]
-    def save
-      puts 'Saving package cache...'
-      @git_resolver.save
-      @cache.save
-    end
-
-    # Clears the reference cache and retries installation.
-    #
-    # @return [void]
-    def retry_install
-      Logger.arrow(
-        'Could not find a solution in local cache, refreshing packages...'
-      )
-
-      @git_resolver.clear
-      resolver.add_constraints dependencies
-
-      populate_elm_stuff
-    rescue Solve::Errors::NoSolutionError => error
-      puts 'Could not find a solution:'
-      puts error.to_s.indent(2)
-    end
-
-    private
-
-    # Populates the `elm-stuff` directory with the packages from
-    # the solution.
-    #
-    # @return [void]
-    def populate_elm_stuff
-      save
-      @populator.populate calculate_solution
       puts 'Packages configured successfully!'
+      nil
+    rescue Solve::Errors::NoSolutionError => error
+      Logger.arrow "No solution found: #{error}"
     end
 
-    # Returns the resolver to calculate the solution.
+    Contract None => ArrayOf[Dependency]
+    # Returns the results of solving
     #
-    # @return [Resolver] The resolver
-    def resolver
-      @resolver ||= Resolver.new @cache, @git_resolver
+    # @return [Array] Array of dependencies
+    def results
+      Solve
+        .it!(@graph, initial_solve_constraints)
+        .map do |name, version|
+          dep = @resolver.dependencies[name]
+          dep.version = Semverse::Version.new(version)
+          dep
+        end
     end
 
-    # Returns the solution for the given `elm-package.json` file.
+    Contract None => Array
+    # Returns the inital constraints
     #
-    # @return [Hash] The solution
-    def calculate_solution
-      Solve.it!(
-        GraphBuilder.graph_from_cache(@cache, @options),
-        resolver.constraints
-      )
-    end
-
-    # Returns the dependencies form `elm-package.json`.
-    #
-    # @return [Hash] The dependencies
-    def dependencies
-      @dependencies ||= ElmPackage.dependencies 'elm-package.json',
-                                                silent: false
+    # @return [Array] Array of dependency names and constraints
+    def initial_solve_constraints
+      @identifier.initial_dependencies.flat_map do |dependency|
+        dependency.constraints.map do |constraint|
+          [dependency.name, constraint]
+        end
+      end
     end
   end
 end

@@ -4,3 +4,7 @@ AllCops:
     - 'vendor/**/*'
 Style/FrozenStringLiteralComment:
   Enabled: False
+Metrics/MethodLength:
+  Enabled: False
+Metrics/AbcSize:
+  Enabled: False

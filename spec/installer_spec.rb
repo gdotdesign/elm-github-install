@@ -1,71 +1,102 @@
-require 'spec_helper'
-
 describe ElmInstall::Installer do
   subject { described_class.new cache_directory: CACHE_DIRECTORY }
 
   let(:main_package) do
-    { dependencies: { 'base/core' => '1.0.0 <= v < 2.0.0' } }.to_json
+    {
+      dependencies:
+        {
+          'base/core' => '1.0.0 <= v < 2.0.0',
+          'base/uri' => '1.0.0 <= v < 2.0.0',
+          'base/ssh' => '1.0.0 <= v < 2.0.0'
+        },
+      'dependency-sources' => {
+        'base/uri' => 'https://github.com/base/uri',
+        'base/ssh' => {
+          url: 'git@github.com:base/ssh',
+          ref: 'test'
+        }
+      }
+    }.to_json
   end
 
   let(:base_package) do
-    { dependencies: {} }.to_json
+    { dependencies: { 'test/core' => '1.0.0 <= v < 2.0.0' } }.to_json
+  end
+
+  let(:empty_package) do
+    {}.to_json
   end
 
   context 'sucessfull install' do
     before do
       expect(File)
         .to receive(:read)
-        .and_return(main_package, base_package, base_package)
+        .with(File.join(Dir.pwd, 'elm-package.json'))
+        .and_return(main_package)
+        .twice
 
-      expect_any_instance_of(ElmInstall::Resolver)
-        .to receive(:add_constraints)
+      expect(File)
+        .to receive(:read)
+        .with(File.join(Dir.new(CACHE_DIRECTORY), 'elm-package.json'))
+        .and_return(base_package, empty_package, empty_package, empty_package)
+
+      allow_any_instance_of(ElmInstall::GitSource)
+        .to receive(:versions)
+        .and_return([Semverse::Version.new('1.0.0')])
+
+      allow_any_instance_of(ElmInstall::GitSource)
+        .to receive(:fetch)
+        .with(Semverse::Version.new('1.0.0'))
+        .and_return Dir.new(CACHE_DIRECTORY)
+
+      expect(ElmInstall::Logger)
+        .to receive(:dot)
+        .exactly(4).times
 
       expect(subject)
         .to receive(:puts)
-        .exactly(4).times
-
-      expect(File)
-        .to receive(:binwrite)
-        .with('spec/fixtures/cache/ref-cache.json', any_args)
-
-      expect(File)
-        .to receive(:binwrite)
-        .with('spec/fixtures/cache/cache.json', any_args)
+        .exactly(3).times
 
       expect(File)
         .to receive(:binwrite)
         .with('elm-stuff/exact-dependencies.json', any_args)
+        .and_return(0)
     end
 
-    it 'should install dependencies' do
+    it 'installs dependencies' do
       subject.install
     end
   end
 
   context 'unsuccessfull install' do
+    let(:main_package) do
+      { dependencies: { 'base/test' => '1.0.0 <= v < 2.0.0' } }.to_json
+    end
+
     before do
       expect(File)
         .to receive(:read)
-        .and_return(main_package, base_package, base_package)
-
-      expect_any_instance_of(ElmInstall::Resolver)
-        .to receive(:add_constraints)
-        .exactly(2).times
+        .with(File.join(Dir.pwd, 'elm-package.json'))
+        .and_return(main_package)
+        .twice
 
       expect(subject)
-        .to receive(:populate_elm_stuff)
-        .exactly(2).times
+        .to receive(:results)
         .and_raise(Solve::Errors::NoSolutionError)
+
+      expect_any_instance_of(ElmInstall::GitSource)
+        .to receive(:versions)
+        .and_return([])
 
       expect(ElmInstall::Logger)
         .to receive(:arrow)
 
       expect(subject)
         .to receive(:puts)
-        .exactly(4).times
+        .exactly(2).times
     end
 
-    it 'should install dependencies' do
+    it 'does not install anything' do
       subject.install
     end
   end

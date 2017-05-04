@@ -2,3 +2,7 @@ TooManyStatements:
   max_statements: 7
 InstanceVariableAssumption:
   enabled: false
+Attribute:
+  enabled: false
+FeatureEnvy:
+  enabled: false

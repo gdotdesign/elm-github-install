@@ -39,13 +39,13 @@ var download = function(suffix){
     .pipe(extractor)
 }
 
-if(platform == 'linux' && arch == 'x64') {
+if(platform === 'linux' && arch === 'x64') {
   download('linux-x86_64')
-} else if (platform == 'linux') {
+} else if (platform === 'linux') {
   download('linux-x86')
-} else if (platform == 'darwin') {
+} else if (platform === 'darwin') {
   download('osx')
-} else if (platform == 'win32') {
+} else if (platform === 'win32') {
   var tmpFile = tmp.fileSync()
   var url =
     [ prefix,
