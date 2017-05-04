@@ -11,13 +11,20 @@ describe ElmInstall::Installer do
         },
       'dependency-sources' => {
         'base/uri' => 'https://github.com/base/uri',
-        'base/ssh' => 'git@github.com:base/ssh'
+        'base/ssh' => {
+          url: 'git@github.com:base/ssh',
+          ref: 'test'
+        }
       }
     }.to_json
   end
 
   let(:base_package) do
-    { dependencies: {} }.to_json
+    { dependencies: { 'test/core' => '1.0.0 <= v < 2.0.0' } }.to_json
+  end
+
+  let(:empty_package) do
+    {}.to_json
   end
 
   context 'sucessfull install' do
@@ -28,10 +35,10 @@ describe ElmInstall::Installer do
         .and_return(main_package)
         .twice
 
-      allow(File)
+      expect(File)
         .to receive(:read)
         .with(File.join(Dir.new(CACHE_DIRECTORY), 'elm-package.json'))
-        .and_return(base_package)
+        .and_return(base_package, empty_package, empty_package, empty_package)
 
       allow_any_instance_of(ElmInstall::GitSource)
         .to receive(:versions)
@@ -44,7 +51,7 @@ describe ElmInstall::Installer do
 
       expect(ElmInstall::Logger)
         .to receive(:dot)
-        .exactly(3).times
+        .exactly(4).times
 
       expect(subject)
         .to receive(:puts)

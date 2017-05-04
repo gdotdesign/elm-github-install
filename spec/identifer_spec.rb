@@ -17,16 +17,15 @@ describe ElmInstall::Identifier do
           ref: 'master'
         },
         'test/dir' => '../'
-      }
-
+      },
+      version: '1.0.0'
     }.to_json
   end
 
   before do
-    expect(File)
+    allow(File)
       .to receive(:read)
       .and_return(package_json)
-      .twice
   end
 
   describe 'Invalid json' do
@@ -38,6 +37,13 @@ describe ElmInstall::Identifier do
         .twice
 
       subject
+    end
+  end
+
+  describe '#version' do
+    it 'returns the version from the json' do
+      expect(subject.version(Dir.new('.')))
+        .to eq(Semverse::Version.new('1.0.0'))
     end
   end
 

@@ -112,7 +112,7 @@ module ElmInstall
     #
     # @return [String] The path
     def path
-      File.join(options[:cache_directory], host, package_name)
+      File.join(options[:cache_directory].to_s, host, package_name)
     end
 
     Contract None => String
@@ -160,7 +160,10 @@ module ElmInstall
         when Branch::Just
           "#{url} at #{@branch.ref}"
         else
+          # NOTE: Cannot happen
+          # :nocov:
           url
+          # :nocov:
         end
       else
         url
