@@ -2,4 +2,4 @@ source 'https://rubygems.org'
 
 ruby '2.2.2'
 
-gem 'elm_install', '1.0.0-rc'
+gem 'elm_install', '1.0.0'
