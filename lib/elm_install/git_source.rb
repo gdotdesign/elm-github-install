@@ -97,6 +97,8 @@ module ElmInstall
         .select do |version|
           constraints.all? { |constraint| constraint.satisfies?(version) }
         end
+        .sort
+        .reverse
     end
 
     Contract None => String
