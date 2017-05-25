@@ -16,7 +16,7 @@ This gem/npm-package allows you to install Elm packages **in a decentralized way
 
 ## Installation
 
-If you have ruby installed on your machine then you can install it directy from
+If you have ruby installed on your machine then you can install it directly from
 [rubygems.org](https://rubygems.org/gems/elm_install):
 ```
 gem install elm_install
@@ -166,7 +166,7 @@ OPTIONS:
 
 #### Do I need to use SSH keys?
 
-It dependes on your use case, but for public repositories in Github or Bitbucket
+It depends on your use case, but for public repositories in Github or Bitbucket
 it's not needed.
 
 #### What url protocols are supported?
