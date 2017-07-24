@@ -11,6 +11,7 @@ describe ElmInstall::GitSource do
 
   before do
     subject.options = { cache_directory: CACHE_DIRECTORY }
+    allow(repository).to receive(:cloned?).and_return true
   end
 
   let(:repository) do

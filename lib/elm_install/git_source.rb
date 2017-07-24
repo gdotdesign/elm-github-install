@@ -70,9 +70,11 @@ module ElmInstall
     #
     # @return [Array] The versions
     def versions(constraints)
-      # Get updates from upstream
-      Logger.arrow "Getting updates for: #{package_name.bold}"
-      repository.fetch
+      if repository.cloned?
+        # Get updates from upstream
+        Logger.arrow "Getting updates for: #{package_name.bold}"
+        repository.fetch
+      end
 
       case @branch
       when Branch::Just
