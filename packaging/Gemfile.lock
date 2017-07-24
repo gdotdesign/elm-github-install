@@ -5,7 +5,7 @@ GEM
     commander (4.4.3)
       highline (~> 1.7.2)
     contracts (0.16.0)
-    elm_install (1.0.1)
+    elm_install (1.1.0)
       adts (~> 0.1.2)
       commander (~> 4.4, >= 4.4.2)
       contracts (~> 0.16.0)
@@ -33,7 +33,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  elm_install (= 1.0.1)
+  elm_install (= 1.1.0)
 
 RUBY VERSION
    ruby 2.2.2p95
