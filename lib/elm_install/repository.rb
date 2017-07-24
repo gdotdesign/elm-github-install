@@ -63,10 +63,17 @@ module ElmInstall
     #
     # @return [Git::Base]
     def repo
-      clone unless Dir.exist?(path)
+      clone unless cloned?
       @repo ||= Git.open path
       @repo.reset_hard
       @repo
+    end
+
+    # Returns if the repository has been cloned yet or not
+    #
+    # @return [Bool]
+    def cloned?
+      Dir.exist?(path)
     end
 
     Contract None => Git::Base

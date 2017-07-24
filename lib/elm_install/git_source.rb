@@ -70,17 +70,16 @@ module ElmInstall
     #
     # @return [Array] The versions
     def versions(constraints)
+      if repository.cloned?
+        # Get updates from upstream
+        Logger.arrow "Getting updates for: #{package_name.bold}"
+        repository.fetch
+      end
+
       case @branch
       when Branch::Just
         [identifier.version(fetch(@branch.ref))]
       when Branch::Nothing
-        matches = matching_versions constraints
-        return matches if matches.any?
-        Logger.arrow(
-          "Could not find matching versions for: #{package_name.bold}"\
-          ' in cache. Fetching updates.'
-        )
-        repository.fetch
         matching_versions constraints
       end
     end
