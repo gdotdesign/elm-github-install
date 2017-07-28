@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    elm_install (1.1.0)
+    elm_install (1.1.1)
       adts (~> 0.1.2)
       commander (~> 4.4, >= 4.4.2)
       contracts (~> 0.16.0)
@@ -151,4 +151,4 @@ DEPENDENCIES
   simplecov (~> 0.12.0)
 
 BUNDLED WITH
-   1.13.7
+   1.15.3
