@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'solve', '~> 3.1'
   s.add_dependency 'commander', '~> 4.4', '>= 4.4.2'
   s.add_dependency 'smart_colored', '~> 1.1', '>= 1.1.1'
-  s.add_dependency 'hashdiff', '~> 0.3.1'
+  s.add_dependency 'molinillo', '0.5.7'
   s.add_dependency 'indentation', '~> 0.1.1'
   s.add_dependency 'contracts', '~> 0.16.0'
   s.add_dependency 'adts', '~> 0.1.2'
