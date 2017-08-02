@@ -16,7 +16,9 @@
   },
   "dependencies": {
     "adm-zip": "^0.4.7",
+    "progress": "^2.0.0",
     "request": "2.74.0",
+    "request-progress": "^3.0.0",
     "shelljs": "0.7.5",
     "tar-fs": "1.15.0",
     "tmp": "^0.0.31"

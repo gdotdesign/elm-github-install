@@ -10,7 +10,7 @@ var version =
   fs.readFileSync(versionPath, 'utf-8')
     .match(/(\d+\.\d+\.\d+)/)[1]
 
-var homedir = path.join(os.homedir(), '.elm-install')
+var homedir = path.join(__dirname, 'dist-' + version)
 var platform = os.platform()
 var arch = process.arch
 
