@@ -1,6 +1,8 @@
+var progress = require('request-progress')
+var ProgressBar = require('progress')
 var request = require('request')
-var shell = require('shelljs')
 var AdmZip = require('adm-zip')
+var shell = require('shelljs')
 var tar = require('tar-fs')
 var path = require('path')
 var zlib = require('zlib')
@@ -13,7 +15,11 @@ var version =
   fs.readFileSync(versionPath, 'utf-8')
     .match(/(\d+\.\d+\.\d+)/)[1]
 
-var homedir = path.join(os.homedir(), '.elm-install')
+var homedir = path.join(__dirname, 'dist-' + version)
+
+// We already have that version downloaded
+if(fs.existsSync(homedir)){ process.exit() }
+
 var platform = os.platform()
 var arch = process.arch
 
@@ -29,12 +35,31 @@ var packageUrl = function(suffix) {
   ].join('/')
 }
 
-var download = function(suffix){
-  console.log(
-    'Downloading and extracting the binary from: ' + packageUrl(suffix))
+var downloadRequest = function(url) {
+  var bar, lastTransferred
 
-  request
-    .get(packageUrl(suffix))
+  return progress(request.get(url))
+    .on("progress", function(data){
+      if (bar) {
+        bar.tick(data.size.transferred - lastTransferred)
+        lastTransferred = data.size.transferred
+      } else {
+        lastTransferred = 0
+        bar = new ProgressBar(
+          'Downloading and extracting the binary: [:bar] :rate/bps :percent :etas',
+          {
+            total: data.size.total,
+            incomplete: ' ',
+            complete: '=',
+            width: 60
+          }
+        )
+      }
+    })
+}
+
+var download = function(suffix){
+  downloadRequest(packageUrl(suffix))
     .pipe(zlib.createGunzip())
     .pipe(extractor)
 }
@@ -53,10 +78,7 @@ if(platform === 'linux' && arch === 'x64') {
       'elm-install-' + version + '-win32.zip'
     ].join('/')
 
-  console.log('Downloading and extracting the binary from: ' + url)
-
-  request
-    .get(url)
+  downloadRequest(url)
     .pipe(fs.createWriteStream(tmpFile.name))
     .on('finish', function(){
       var zip = new AdmZip(tmpFile.name)

@@ -10,3 +10,4 @@ coverage
 test.elm
 test.rb
 index.html
+scripts/dist*
