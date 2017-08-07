@@ -7,6 +7,8 @@ module ElmInstall
     # @return [Branch] The branch
     attr_reader :branch
 
+    @@fetched = {}
+
     Contract Uri, Branch => GitSource
     # Initializes a git source by URI and branch
     #
@@ -70,9 +72,10 @@ module ElmInstall
     #
     # @return [Array] The versions
     def versions(constraints)
-      if repository.cloned?
+      if repository.cloned? && !@@fetched[url]
         # Get updates from upstream
         Logger.arrow "Getting updates for: #{package_name.bold}"
+        @@fetched[url] = true
         repository.fetch
       end
 

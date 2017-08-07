@@ -36,8 +36,6 @@ module ElmInstall
     #
     # @return nil
     def resolve_dependency(dependency)
-      return if @dependencies[dependency.name]
-
       @dependencies[dependency.name] ||= dependency
 
       dependency
