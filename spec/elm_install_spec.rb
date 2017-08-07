@@ -1,8 +1,7 @@
 describe ElmInstall do
   it 'should install packages' do
-    expect(ElmInstall::Logger)
+    allow(ElmInstall::Logger)
       .to receive(:arrow)
-      .twice
 
     expect_any_instance_of(ElmInstall::Installer)
       .to receive(:install)

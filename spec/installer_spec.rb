@@ -29,11 +29,10 @@ describe ElmInstall::Installer do
 
   context 'sucessfull install' do
     before do
-      expect(File)
+      allow(File)
         .to receive(:read)
         .with(File.join(Dir.pwd, 'elm-package.json'))
         .and_return(main_package)
-        .twice
 
       expect(File)
         .to receive(:read)
@@ -74,11 +73,10 @@ describe ElmInstall::Installer do
     end
 
     before do
-      expect(File)
+      allow(File)
         .to receive(:read)
         .with(File.join(Dir.pwd, 'elm-package.json'))
         .and_return(main_package)
-        .twice
 
       expect(subject)
         .to receive(:results)

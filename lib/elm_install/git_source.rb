@@ -7,8 +7,6 @@ module ElmInstall
     # @return [Branch] The branch
     attr_reader :branch
 
-    @@fetched = {}
-
     Contract Uri, Branch => GitSource
     # Initializes a git source by URI and branch
     #
@@ -35,7 +33,12 @@ module ElmInstall
         when Branch::Just
           @branch.ref
         when Branch::Nothing
-          version.to_simple
+          case version
+          when String
+            version
+          else
+            version.to_simple
+          end
         end
 
       repository.checkout ref
@@ -65,17 +68,17 @@ module ElmInstall
       nil
     end
 
-    Contract ArrayOf[Solve::Constraint] => ArrayOf[Semverse::Version]
+    Contract ArrayOf[Solve::Constraint], String => ArrayOf[Semverse::Version]
     # Returns the available versions for a repository
     #
     # @param constraints [Array] The constraints
+    # @param elm_version [String] The Elm version to match against
     #
     # @return [Array] The versions
-    def versions(constraints)
-      if repository.cloned? && !@@fetched[url]
+    def versions(constraints, elm_version)
+      if repository.cloned? && !repository.fetched?
         # Get updates from upstream
         Logger.arrow "Getting updates for: #{package_name.bold}"
-        @@fetched[url] = true
         repository.fetch
       end
 
@@ -83,21 +86,23 @@ module ElmInstall
       when Branch::Just
         [identifier.version(fetch(@branch.ref))]
       when Branch::Nothing
-        matching_versions constraints
+        matching_versions constraints, elm_version
       end
     end
 
-    Contract ArrayOf[Solve::Constraint] => ArrayOf[Semverse::Version]
+    Contract ArrayOf[Solve::Constraint], String => ArrayOf[Semverse::Version]
     # Returns the matchign versions for a repository for the given constraints
     #
     # @param constraints [Array] The constraints
+    # @param elm_version [String] The Elm version to match against
     #
     # @return [Array] The versions
-    def matching_versions(constraints)
+    def matching_versions(constraints, elm_version)
       repository
         .versions
         .select do |version|
-          constraints.all? { |constraint| constraint.satisfies?(version) }
+          identifier.elm_version(fetch(version.to_s)) == elm_version &&
+            constraints.all? { |constraint| constraint.satisfies?(version) }
         end
         .sort
         .reverse

@@ -40,7 +40,7 @@ module ElmInstall
 
       dependency
         .source
-        .versions(dependency.constraints)
+        .versions(dependency.constraints, @identifier.initial_elm_version)
         .each do |version|
           resolve_dependencies(dependency, version)
         end

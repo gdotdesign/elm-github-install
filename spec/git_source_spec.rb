@@ -51,10 +51,23 @@ describe ElmInstall::GitSource do
           .to receive(:fetch)
 
         expect(repository)
+          .to receive(:fetched?)
+          .and_return(false)
+
+        expect(repository)
           .to receive(:versions)
           .and_return([Semverse::Version.new('1.0.0')])
 
-        subject.versions([])
+        expect(repository)
+          .to receive(:checkout)
+          .with('1.0.0')
+          .and_return(Dir.new('.'))
+
+        expect(subject)
+          .to receive(:identifier)
+          .and_return(double(elm_version: '0.18'))
+
+        subject.versions([], '0.18')
       end
     end
 
@@ -88,6 +101,10 @@ describe ElmInstall::GitSource do
               expect(repository)
                 .to receive(:fetch)
 
+              expect(repository)
+                .to receive(:fetched?)
+                .and_return(false)
+
               expect(subject)
                 .to receive(:identifier)
                 .and_return(double(version: Semverse::Version.new('1.0.0')))
@@ -96,7 +113,7 @@ describe ElmInstall::GitSource do
                 .to receive(:checkout)
                 .and_return(Dir.new('.'))
 
-              subject.versions([])
+              subject.versions([], '0.18')
             end
           end
         end
@@ -108,10 +125,23 @@ describe ElmInstall::GitSource do
             .to receive(:fetch)
 
           expect(repository)
+            .to receive(:fetched?)
+            .and_return(false)
+
+          expect(repository)
+            .to receive(:checkout)
+            .with('1.0.0')
+            .and_return(Dir.new('.'))
+
+          expect(subject)
+            .to receive(:identifier)
+            .and_return(double(elm_version: '0.18'))
+
+          expect(repository)
             .to receive(:versions)
             .and_return([Semverse::Version.new('1.0.0')])
 
-          subject.versions([])
+          subject.versions([], '0.18')
         end
       end
     end

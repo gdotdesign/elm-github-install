@@ -11,7 +11,7 @@ module ElmInstall
     # @return [String]
     attr_reader :path
 
-    def_delegators :repo, :fetch
+    @@fetched = {}
 
     Contract String, String => Repository
     # Initializes a repository.
@@ -76,6 +76,22 @@ module ElmInstall
       Dir.exist?(path)
     end
 
+    # Returns if the repository has been fetched yet or not.
+    #
+    # @return [Bool]
+    def fetched?
+      @@fetched.key?(url)
+    end
+
+    # Fetches changes from a repository
+    #
+    # @return [Void]
+    def fetch
+      return if fetched?
+      repo.fetch
+      @@fetched[url] = true
+    end
+
     Contract None => Git::Base
     # Clones the repository
     #
@@ -83,6 +99,7 @@ module ElmInstall
     def clone
       Logger.arrow "Package: #{url.bold} not found in cache, cloning..."
       FileUtils.mkdir_p path
+      @@fetched[url] = true
       @repo = Git.clone(url, path)
     end
   end

@@ -8,3 +8,7 @@ Metrics/MethodLength:
   Enabled: False
 Metrics/AbcSize:
   Enabled: False
+ClassLength:
+  Enabled: False
+ClassVars:
+  Enabled: False

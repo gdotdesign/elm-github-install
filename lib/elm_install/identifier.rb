@@ -7,6 +7,9 @@ module ElmInstall
     # @return [Hash] The options
     attr_reader :options
 
+    # @return [String] The initial Elm version
+    attr_reader :initial_elm_version
+
     Contract Dir, Hash => Identifier
     # Initialize a new identifier.
     #
@@ -17,6 +20,7 @@ module ElmInstall
     def initialize(directory, options = {})
       @options = options
       @dependency_sources = dependency_sources directory
+      @initial_elm_version = elm_version directory
       @initial_dependencies = identify directory
       self
     end
@@ -39,6 +43,24 @@ module ElmInstall
     # @return [Semverse::Version] The version
     def version(directory)
       Semverse::Version.new(json(directory)['version'])
+    end
+
+    Contract Dir => String
+    # Returns the Elm version for a package
+    #
+    # @param directory [Dir] The directory
+    #
+    # @return [String] The version
+    def elm_version(directory)
+      if json(directory)['elm-version'] =~ /<\s*0\.19/
+        '0.18'
+      elsif json(directory)['elm-version'] =~ /<\s*0\.18/
+        '0.17'
+      elsif json(directory)['elm-version'] =~ /<\s*0\.17/
+        '0.16'
+      else
+        ''
+      end
     end
 
     Contract Dir => ArrayOf[Dependency]
