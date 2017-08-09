@@ -42,6 +42,7 @@ module ElmInstall
         .source
         .versions(dependency.constraints, @identifier.initial_elm_version)
         .each do |version|
+          next if @graph.artifact?(dependency.name, version)
           resolve_dependencies(dependency, version)
         end
 
