@@ -162,6 +162,12 @@ OPTIONS:
   --verbose
 ```
 
+## Known Issues
+* Using the NPM package or the released binaries in windows while specifing a
+  relative directory as a package will fail because of the 2.2 travelling
+  ruby dependency. Using the >Ruby 2.3 with the gem installed works properly.
+  More #36
+
 ## FAQ
 
 #### Do I need to use SSH keys?
