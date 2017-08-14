@@ -32,9 +32,8 @@ describe ElmInstall::Identifier do
     let(:package_json) { '' }
 
     it 'throws an error' do
-      expect(ElmInstall::Logger)
+      allow(ElmInstall::Logger)
         .to receive(:arrow)
-        .twice
 
       subject
     end

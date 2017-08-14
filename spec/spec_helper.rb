@@ -6,6 +6,7 @@ RSpec.configure do |config|
   config.before do
     allow(Process).to receive(:exit)
     allow(ElmInstall::Logger).to receive(:puts)
+    ElmInstall::Repository.class_variable_set('@@fetched', {})
     FileUtils.mkdir_p CACHE_DIRECTORY
   end
 

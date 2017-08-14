@@ -36,14 +36,13 @@ module ElmInstall
     #
     # @return nil
     def resolve_dependency(dependency)
-      return if @dependencies[dependency.name]
-
       @dependencies[dependency.name] ||= dependency
 
       dependency
         .source
-        .versions(dependency.constraints)
+        .versions(dependency.constraints, @identifier.initial_elm_version)
         .each do |version|
+          next if @graph.artifact?(dependency.name, version)
           resolve_dependencies(dependency, version)
         end
 
