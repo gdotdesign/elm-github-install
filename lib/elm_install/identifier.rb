@@ -133,23 +133,20 @@ module ElmInstall
       path = File.join(directory, 'elm-package.json')
       JSON.parse(File.read(path))
     rescue JSON::ParserError
-      exit "Invalid JSON in file: #{path.bold}"
-      {}
+      warn "Invalid JSON in file: #{path.bold}"
     rescue Errno::ENOENT
-      exit "Could not find file: #{path.bold}"
-      {}
+      warn "Could not find file: #{path.bold}"
     end
 
-    Contract String => NilClass
+    Contract String => Hash
     # Exits the current process and logs a given message.
     #
     # @param message [String] The message
     #
-    # @return nil
-    def exit(message)
-      Logger.arrow message
-      Process.exit
-      nil
+    # @return [Hash] An empty hash
+    def warn(message)
+      Logger.arrow message if @options[:vebose]
+      {}
     end
   end
 end

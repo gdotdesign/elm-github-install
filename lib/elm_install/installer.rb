@@ -29,6 +29,7 @@ module ElmInstall
       nil
     rescue Solve::Errors::NoSolutionError => error
       Logger.arrow "No solution found: #{error}"
+      Process.abort
     end
 
     Contract None => ArrayOf[Dependency]
