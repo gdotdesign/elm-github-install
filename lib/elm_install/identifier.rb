@@ -148,7 +148,7 @@ module ElmInstall
     # @return nil
     def exit(message)
       Logger.arrow message
-      Process.exit
+      Process.abort
       nil
     end
   end
