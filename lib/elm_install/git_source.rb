@@ -89,7 +89,7 @@ module ElmInstall
     #
     # @return [Array] The versions
     def versions(constraints, elm_version, should_update)
-      if repository.cloned? && !repository.fetched? && should_update
+      if repository.cloned? && !repository.fetched && should_update
         # Get updates from upstream
         Logger.arrow "Getting updates for: #{package_name.bold}"
         repository.fetch
@@ -168,7 +168,7 @@ module ElmInstall
     #
     # @return [Repository] The repository
     def repository
-      @repository ||= Repository.new url, path
+      @repository ||= Repository.of url, path
     end
 
     Contract None => Or[String, NilClass]

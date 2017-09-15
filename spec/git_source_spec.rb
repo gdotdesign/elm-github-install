@@ -51,7 +51,7 @@ describe ElmInstall::GitSource do
           .to receive(:fetch)
 
         expect(repository)
-          .to receive(:fetched?)
+          .to receive(:fetched)
           .and_return(false)
 
         expect(repository)
@@ -102,7 +102,7 @@ describe ElmInstall::GitSource do
                 .to receive(:fetch)
 
               expect(repository)
-                .to receive(:fetched?)
+                .to receive(:fetched)
                 .and_return(false)
 
               expect(subject)
@@ -125,7 +125,7 @@ describe ElmInstall::GitSource do
             .to receive(:fetch)
 
           expect(repository)
-            .to receive(:fetched?)
+            .to receive(:fetched)
             .and_return(false)
 
           expect(repository)

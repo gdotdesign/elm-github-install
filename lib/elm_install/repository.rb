@@ -11,7 +11,21 @@ module ElmInstall
     # @return [String]
     attr_reader :path
 
-    @@fetched = {}
+    # Whether or not the repository has been fetched (updated)
+    # @return [Bool]
+    attr_reader :fetched
+
+    Contract String, String => Repository
+    # Returns the repository for the given url and path
+    #
+    # @param url [String] The url
+    # @param path [String] The path
+    #
+    # @return [Repository] The repository
+    def self.of(url, path)
+      @repositories ||= {}
+      @repositories[url] ||= new url, path
+    end
 
     Contract String, String => Repository
     # Initializes a repository.
@@ -21,6 +35,7 @@ module ElmInstall
     #
     # @return [Repository] The repository instance
     def initialize(url, path)
+      @fetched = false
       @path = path
       @url = url
       self
@@ -51,7 +66,8 @@ module ElmInstall
     #
     # @return [Array<Semverse::Version>] The versions
     def versions
-      repo
+      @versions ||=
+        repo
         .tags
         .map(&:name)
         .select { |tag| tag =~ /(.*\..*\..*)/ }
@@ -77,20 +93,13 @@ module ElmInstall
       Dir.exist?(path)
     end
 
-    # Returns if the repository has been fetched yet or not.
-    #
-    # @return [Bool]
-    def fetched?
-      @@fetched.key?(url)
-    end
-
     # Fetches changes from a repository
     #
     # @return [Void]
     def fetch
-      return if fetched?
+      return if fetched
       repo.fetch
-      @@fetched[url] = true
+      @fetched = true
     end
 
     Contract None => Git::Base
@@ -100,7 +109,7 @@ module ElmInstall
     def clone
       Logger.arrow "Package: #{url.bold} not found in cache, cloning..."
       FileUtils.mkdir_p path
-      @@fetched[url] = true
+      @fetched = true
       @repo = Git.clone(url, path)
     end
   end
