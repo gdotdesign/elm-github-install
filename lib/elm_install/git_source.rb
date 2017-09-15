@@ -68,6 +68,18 @@ module ElmInstall
       nil
     end
 
+    Contract String => String
+    # Returns the supported Elm version the given ref.
+    #
+    # @param ref [String] The ref
+    #
+    # @return [Array] The version
+    def elm_version_of(ref)
+      @@elm_versions ||= {}
+      @@elm_versions[url] ||= {}
+      @@elm_versions[url][ref] ||= identifier.elm_version(fetch(ref))
+    end
+
     Contract ArrayOf[Solve::Constraint], String => ArrayOf[Semverse::Version]
     # Returns the available versions for a repository
     #
@@ -101,7 +113,7 @@ module ElmInstall
       repository
         .versions
         .select do |version|
-          identifier.elm_version(fetch(version.to_s)) == elm_version &&
+          elm_version_of(version.to_s) == elm_version &&
             constraints.all? { |constraint| constraint.satisfies?(version) }
         end
         .sort
