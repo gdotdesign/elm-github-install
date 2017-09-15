@@ -8,6 +8,15 @@ program :name, 'elm-install'
 program :version, ElmInstall::VERSION
 program :description, 'Install Elm packages from Git repositories.'
 
+command 'update-package' do |c|
+  c.syntax = 'elm-install update-package package/name'
+  c.summary = 'Updates a packages cache (fetches from remote)'
+
+  c.action do |args|
+    puts args
+  end
+end
+
 command :install do |c|
   c.syntax = 'elm-install install'
   c.summary = 'Install Elm packages from the elm-package.json file.'

@@ -8,6 +8,7 @@ module ElmInstall
     # Initializes a resolver
     #
     # @param identifier [Identifier] The identifier
+    # @param options [Hash] The options
     #
     # @return [Resolver]
     def initialize(identifier, options = {})
@@ -44,7 +45,8 @@ module ElmInstall
         .versions(
           dependency.constraints,
           @identifier.initial_elm_version,
-          !@options[:skip_update])
+          !@options[:skip_update]
+        )
         .each do |version|
           next if @graph.artifact?(dependency.name, version)
           resolve_dependencies(dependency, version)

@@ -80,7 +80,8 @@ module ElmInstall
       @@elm_versions[url][ref] ||= identifier.elm_version(fetch(ref))
     end
 
-    Contract ArrayOf[Solve::Constraint], String, Bool => ArrayOf[Semverse::Version]
+    Contract ArrayOf[Solve::Constraint],
+             String, Bool => ArrayOf[Semverse::Version]
     # Returns the available versions for a repository
     #
     # @param constraints [Array] The constraints
