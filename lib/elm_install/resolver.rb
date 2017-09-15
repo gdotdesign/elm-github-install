@@ -4,16 +4,17 @@ module ElmInstall
     # @return [Array<Dependency>] The dependencies
     attr_reader :dependencies
 
-    Contract Identifier => Resolver
+    Contract Identifier, Hash => Resolver
     # Initializes a resolver
     #
     # @param identifier [Identifier] The identifier
     #
     # @return [Resolver]
-    def initialize(identifier)
+    def initialize(identifier, options = {})
       @graph = Solve::Graph.new
       @identifier = identifier
       @dependencies = {}
+      @options = options
       self
     end
 
@@ -40,7 +41,10 @@ module ElmInstall
 
       dependency
         .source
-        .versions(dependency.constraints, @identifier.initial_elm_version)
+        .versions(
+          dependency.constraints,
+          @identifier.initial_elm_version,
+          !@options[:skip_update])
         .each do |version|
           next if @graph.artifact?(dependency.name, version)
           resolve_dependencies(dependency, version)

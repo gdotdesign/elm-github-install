@@ -13,6 +13,7 @@ command :install do |c|
   c.summary = 'Install Elm packages from the elm-package.json file.'
   c.option '--cache-directory STRING', String,
            'Specifies where the cache is stored'
+  c.option '--skip-update'
   c.option '--verbose'
   c.action do |_args, options|
     ElmInstall.install(

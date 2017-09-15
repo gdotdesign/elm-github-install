@@ -2,6 +2,7 @@ module ElmInstall
   # Installer class
   class Installer < Base
     Contract KeywordArgs[cache_directory: Or[String, NilClass],
+                         skip_update: Or[Bool, NilClass],
                          verbose: Or[Bool, NilClass]] => Installer
     # Initializes an installer with the given options
     #
@@ -10,7 +11,7 @@ module ElmInstall
     # @return [Installer] The installer instance
     def initialize(options = {})
       @identifier = Identifier.new Dir.new(Dir.pwd), options
-      @resolver = Resolver.new @identifier
+      @resolver = Resolver.new @identifier, options
       self
     end
 
