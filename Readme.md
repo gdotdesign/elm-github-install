@@ -159,6 +159,12 @@ OPTIONS:
   --cache-directory STRING
       Specifies where the cache is stored
 
+  --skip-update
+      Skips the update stage of packages
+
+  --only-update STRING
+      Only updates the given package
+
   --verbose
 ```
 
