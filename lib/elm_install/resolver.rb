@@ -45,7 +45,8 @@ module ElmInstall
         .versions(
           dependency.constraints,
           @identifier.initial_elm_version,
-          !@options[:skip_update]
+          !@options[:skip_update],
+          @options[:only_update]
         )
         .each do |version|
           next if @graph.artifact?(dependency.name, version)

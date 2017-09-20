@@ -81,15 +81,20 @@ module ElmInstall
     end
 
     Contract ArrayOf[Solve::Constraint],
-             String, Bool => ArrayOf[Semverse::Version]
+             String,
+             Bool,
+             Or[String, NilClass] => ArrayOf[Semverse::Version]
     # Returns the available versions for a repository
     #
     # @param constraints [Array] The constraints
     # @param elm_version [String] The Elm version to match against
     #
     # @return [Array] The versions
-    def versions(constraints, elm_version, should_update)
-      if repository.cloned? && !repository.fetched && should_update
+    def versions(constraints, elm_version, should_update, only_update)
+      if repository.cloned? &&
+         !repository.fetched &&
+         should_update &&
+         (!only_update || only_update == package_name)
         # Get updates from upstream
         Logger.arrow "Getting updates for: #{package_name.bold}"
         repository.fetch

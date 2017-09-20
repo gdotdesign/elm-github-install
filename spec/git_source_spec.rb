@@ -67,7 +67,7 @@ describe ElmInstall::GitSource do
           .to receive(:identifier)
           .and_return(double(elm_version: '0.18'))
 
-        subject.versions([], '0.18', true)
+        subject.versions([], '0.18', true, nil)
       end
     end
 
@@ -113,7 +113,7 @@ describe ElmInstall::GitSource do
                 .to receive(:checkout)
                 .and_return(Dir.new('.'))
 
-              subject.versions([], '0.18', true)
+              subject.versions([], '0.18', true, nil)
             end
           end
         end
@@ -141,7 +141,7 @@ describe ElmInstall::GitSource do
             .to receive(:versions)
             .and_return([Semverse::Version.new('1.0.0')])
 
-          subject.versions([], '0.18', true)
+          subject.versions([], '0.18', true, nil)
         end
       end
     end

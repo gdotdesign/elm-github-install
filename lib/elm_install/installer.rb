@@ -3,6 +3,7 @@ module ElmInstall
   class Installer < Base
     Contract KeywordArgs[cache_directory: Or[String, NilClass],
                          skip_update: Or[Bool, NilClass],
+                         only_update: Or[String, NilClass],
                          verbose: Or[Bool, NilClass]] => Installer
     # Initializes an installer with the given options
     #
