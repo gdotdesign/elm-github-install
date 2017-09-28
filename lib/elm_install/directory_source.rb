@@ -45,13 +45,16 @@ module ElmInstall
       nil
     end
 
-    Contract ArrayOf[Solve::Constraint] => ArrayOf[Semverse::Version]
+    Contract ArrayOf[Solve::Constraint],
+             String,
+             Bool,
+             Or[String, NilClass] => ArrayOf[Semverse::Version]
     # Returns the available versions for a repository
     #
     # @param _ [Array] The constraints
     #
     # @return [Array] The versions
-    def versions(_)
+    def versions(*_)
       [identifier.version(fetch(''))]
     end
 
