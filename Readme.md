@@ -22,11 +22,24 @@ If you have ruby installed on your machine then you can install it directly from
 gem install elm_install
 ```
 
-If you have npm installed on your machine then you can install it directly from
+If you have node.js installed on your machine then you can install it directly from
 [npm](https://www.npmjs.com/package/elm-github-install):
 
 ```
 npm install elm-github-install -g
+```
+
+or with [yarn](https://yarnpkg.com/en/):
+
+```
+yarn global add elm-github-install
+```
+
+If you are experiencing `EACCES: permission denied` errors during installation
+using NPM then you can try:
+
+```
+sudo npm i -g elm-github-install --unsafe-perm=true --allow-root
 ```
 
 There are also dependency free versions available for every release in the
