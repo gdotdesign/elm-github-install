@@ -6,7 +6,11 @@ module Semverse
     #
     # @return [String]
     def to_simple
-      "#{major}.#{minor}.#{patch}"
+      if pre_release then
+        "#{major}.#{minor}.#{patch}-#{pre_release}" 
+      else 
+        "#{major}.#{minor}.#{patch}"
+      end
     end
 
     # Tries to parse a version, falling back to nil if fails.
