@@ -7,6 +7,16 @@
 [![Inline docs](http://inch-ci.org/github/gdotdesign/elm-github-install.svg?branch=master)](http://inch-ci.org/github/gdotdesign/elm-github-install)
 [![Build Status](https://travis-ci.org/gdotdesign/elm-github-install.svg?branch=master)](https://travis-ci.org/gdotdesign/elm-github-install)
 
+----------------------
+
+### This only works with Elm 0.18 and has not been updated to work with Elm 0.19
+
+In Elm 0.19 how native works has changed and also how packages are installed and resolved, because of this it might not be possible to install third party native packages ever.
+
+For more information check this issue: https://github.com/gdotdesign/elm-github-install/issues/62
+
+----------------------
+
 This gem/npm-package allows you to install Elm packages **in a decentralized way from Git repositories**, this allows:
 * installing of **effect manager** and **native** packages
 * installing **forks of packages** for testing or unreleased features
