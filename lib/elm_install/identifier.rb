@@ -52,11 +52,12 @@ module ElmInstall
     #
     # @return [String] The version
     def elm_version(directory)
-      if json(directory)['elm-version'] =~ /<\s*0\.19/
+      case json(directory)['elm-version']
+      when /<\s*0\.19/, /<=\s*0\.18/
         '0.18'
-      elsif json(directory)['elm-version'] =~ /<\s*0\.18/
+      when /<\s*0\.18/, /<=\s*0\.17/
         '0.17'
-      elsif json(directory)['elm-version'] =~ /<\s*0\.17/
+      when /<\s*0\.17/, /<=\s*0\.16/
         '0.16'
       else
         ''
